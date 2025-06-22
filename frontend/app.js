@@ -171,25 +171,48 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function addTask(title) {
-        await fetch(`${API_URL}/tasks`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ title }),
-        });
+        try {
+            const res = await fetch(`${API_URL}/tasks`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title }),
+            });
+            if (!res.ok) {
+                console.error('Failed to add task. Server responded with ' + res.status);
+            }
+        } catch (error) {
+            console.error('Error adding task:', error);
+        }
     }
 
     async function deleteTask(id) {
-        await fetch(`${API_URL}/tasks/${id}`, { method: 'DELETE' });
-        loadTasks();
+        try {
+            const res = await fetch(`${API_URL}/tasks/${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                loadTasks();
+            } else {
+                console.error('Failed to delete task. Server responded with ' + res.status);
+            }
+        } catch (error) {
+            console.error('Error deleting task:', error);
+        }
     }
 
     async function toggleTask(id, completed) {
-        await fetch(`${API_URL}/tasks/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ completed }),
-        });
-        loadTasks();
+        try {
+            const res = await fetch(`${API_URL}/tasks/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ completed }),
+            });
+            if (res.ok) {
+                loadTasks();
+            } else {
+                console.error('Failed to update task. Server responded with ' + res.status);
+            }
+        } catch (error) {
+            console.error('Error updating task:', error);
+        }
     }
 
     // Initial check
