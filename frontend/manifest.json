@@ -1,0 +1,13 @@
+{
+  "name": "Task Lab",
+  "short_name": "TaskLab",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f4f4f9",
+  "theme_color": "#333",
+  "description": "A simple PWA to focus on your next 3 tasks.",
+  "icons": [
+    { "src": "icons/icon-192x192.png", "type": "image/png", "sizes": "192x192" },
+    { "src": "icons/icon-512x512.png", "type": "image/png", "sizes": "512x512" }
+  ]
+}

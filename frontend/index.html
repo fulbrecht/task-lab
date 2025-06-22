@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Lab</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#333">
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Task Lab</h1>
+            <p>Focus on what's next.</p>
+        </header>
+
+        <main>
+            <ul id="task-list">
+                <!-- Tasks will be rendered here by JavaScript -->
+            </ul>
+
+            <form id="add-task-form">
+                <input type="text" id="new-task-title" placeholder="Add a new task..." autocomplete="off" required>
+                <button type="submit">Add Task</button>
+            </form>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('Service worker registered.', reg))
+                    .catch(err => console.log('Service worker registration failed:', err));
+            });
+        }
+    </script>
+</body>
+</html>
