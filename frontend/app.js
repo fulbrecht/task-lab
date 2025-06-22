@@ -92,8 +92,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     logoutBtn.addEventListener('click', async () => {
-        await fetch(`${API_URL}/logout`);
-        showLoginView();
+        try {
+            const res = await fetch(`${API_URL}/logout`);
+            // Only switch views if the logout was successful on the server
+            if (res.ok) {
+                showLoginView();
+            }
+        } catch (error) {
+            console.error('Logout failed:', error);
+        }
     });
 
     taskForm.addEventListener('submit', async (e) => {
@@ -103,6 +110,24 @@ document.addEventListener('DOMContentLoaded', () => {
             await addTask(title);
             taskInput.value = '';
             loadTasks();
+        }
+    });
+
+    // --- Event Delegation for Task List ---
+    taskList.addEventListener('click', (e) => {
+        const li = e.target.closest('li[data-id]');
+        if (!li) {
+            return;
+        }
+
+        const id = li.dataset.id;
+        const isCompleted = li.classList.contains('completed');
+
+        // Check if the delete button was clicked
+        if (e.target.tagName === 'BUTTON') {
+            deleteTask(id);
+        } else { // Otherwise, the click was on the task item itself
+            toggleTask(id, !isCompleted);
         }
     });
 
@@ -137,10 +162,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const deleteBtn = document.createElement('button');
                 deleteBtn.textContent = 'Delete';
-                deleteBtn.onclick = () => deleteTask(task._id);
-
-                li.onclick = () => toggleTask(task._id, !task.completed);
-
                 li.appendChild(deleteBtn);
                 taskList.appendChild(li);
             });

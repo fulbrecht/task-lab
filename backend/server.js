@@ -13,17 +13,6 @@ const User = require('./models/user'); // Import the User model
 const app = express();
 const port = process.env.PORT || 3000;
 
-// --- Database Connection ---
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
-const db = mongoose.connection;
-db.on('error', console.error.bind(console, 'MongoDB connection error:'));
-db.once('open', () => {
-  console.log('Connected to MongoDB');
-});
-
 // --- Middleware ---
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -117,10 +106,10 @@ app.post('/api/login', passport.authenticate('local'), (req, res) => {
   res.json({ message: 'Logged in successfully', user: { id: req.user._id, username: req.user.username } });
 });
 
-app.get('/api/logout', (req, res) => {
+app.get('/api/logout', (req, res, next) => {
   req.logout(function(err) {
     if (err) { return next(err); }
-    res.redirect('/');
+    res.status(200).json({ message: 'Logged out successfully' });
   });
 });
 
@@ -190,6 +179,18 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
 
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
-});
+// --- Start Server ---
+const startServer = async () => {
+  try {
+    await mongoose.connect(process.env.MONGODB_URI);
+    console.log('Connected to MongoDB');
+    app.listen(port, () => {
+      console.log(`Server is running on http://localhost:${port}`);
+    });
+  } catch (error) {
+    console.error('Error connecting to MongoDB:', error);
+    process.exit(1);
+  }
+};
+
+startServer();
