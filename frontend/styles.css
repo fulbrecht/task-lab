@@ -1,3 +1,8 @@
+/* Universal Box-Sizing for predictable layouts */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
 /* General Body & Container Styles */
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -25,6 +30,10 @@ h1 {
     text-align: center;
     margin-top: 0;
     margin-bottom: 25px;
+}
+
+/* Apply flexbox only to the h1 in the app view for the logout button */
+#app-container h1 {
     display: flex;
     justify-content: space-between;
     align-items: center;

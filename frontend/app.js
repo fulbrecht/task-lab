@@ -107,9 +107,11 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         const title = taskInput.value.trim();
         if (title) {
-            await addTask(title);
-            taskInput.value = '';
-            loadTasks();
+            const success = await addTask(title);
+            if (success) {
+                taskInput.value = '';
+                loadTasks();
+            }
         }
     });
 
@@ -178,40 +180,57 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ title }),
             });
             if (!res.ok) {
-                console.error('Failed to add task. Server responded with ' + res.status);
+                const errorData = await res.json();
+                alert(`Error: ${errorData.message || 'Could not add task.'}`);
+                return false;
             }
+            return true;
         } catch (error) {
             console.error('Error adding task:', error);
+            alert('A network error occurred. Please try again.');
+            return false;
         }
     }
 
     async function deleteTask(id) {
+        const taskElement = taskList.querySelector(`li[data-id="${id}"]`);
+        if (taskElement) {
+            taskElement.remove(); // Optimistically remove from UI
+        }
+
         try {
             const res = await fetch(`${API_URL}/tasks/${id}`, { method: 'DELETE' });
-            if (res.ok) {
-                loadTasks();
-            } else {
+            if (!res.ok) {
                 console.error('Failed to delete task. Server responded with ' + res.status);
+                loadTasks(); // Re-load list to revert the change on error
             }
         } catch (error) {
             console.error('Error deleting task:', error);
+            loadTasks(); // Re-load list to revert the change on error
         }
     }
 
     async function toggleTask(id, completed) {
+        const taskElement = taskList.querySelector(`li[data-id="${id}"]`);
+        if (taskElement) {
+            taskElement.classList.toggle('completed', completed); // Optimistically update style
+        }
+
         try {
             const res = await fetch(`${API_URL}/tasks/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ completed }),
             });
-            if (res.ok) {
-                loadTasks();
-            } else {
+            if (!res.ok) {
                 console.error('Failed to update task. Server responded with ' + res.status);
+                // Revert the optimistic change on error
+                if (taskElement) taskElement.classList.toggle('completed', !completed);
             }
         } catch (error) {
             console.error('Error updating task:', error);
+            // Revert the optimistic change on error
+            if (taskElement) taskElement.classList.toggle('completed', !completed);
         }
     }
 
