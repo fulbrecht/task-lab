@@ -132,6 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Pull-to-refresh Event Listeners ---
     document.body.addEventListener('touchstart', (e) => {
+        console.log('touchstart detected', e.touches[0].clientY, window.scrollY);
         // Only start pull-to-refresh if at the very top of the page
         if (window.scrollY === 0) {
             startY = e.touches[0].clientY;
@@ -142,6 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.body.addEventListener('touchmove', (e) => {
         if (!isPulling) return;
+        console.log('touchmove detected', e.touches[0].clientY);
 
         const currentY = e.touches[0].clientY;
         const pullDistance = currentY - startY;
@@ -150,8 +152,15 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault(); // Prevent native scroll
             // Move the indicator down as the user pulls
             refreshIndicator.style.transform = `translateY(${Math.min(pullDistance / 2, PULL_THRESHOLD)}px)`;
-            refreshIndicator.textContent = pullDistance > PULL_THRESHOLD ? 'Release to refresh' : 'Pull to refresh';
-            refreshIndicator.classList.add('visible');
+            refreshIndicator.classList.add('visible'); // Ensure it's visible during pull
+
+            if (pullDistance > PULL_THRESHOLD) {
+                refreshIndicator.classList.add('armed');
+                refreshIndicator.textContent = 'Release to refresh'; // Text for armed state
+            } else {
+                refreshIndicator.classList.remove('armed');
+                refreshIndicator.textContent = 'Pull to refresh'; // Text for unarmed state
+            }
         } else {
             // If user scrolls down or moves up, stop pulling
             isPulling = false;
@@ -161,9 +170,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.body.addEventListener('touchend', async () => {
+        console.log('touchend detected');
         if (!isPulling) return;
         isPulling = false;
         refreshIndicator.style.transition = 'transform 0.2s ease-out'; // Re-enable transition
+        refreshIndicator.classList.remove('armed'); // Remove armed state on release
 
         const pullDistance = parseFloat(refreshIndicator.style.transform.replace('translateY(', '').replace('px)', ''));
         if (pullDistance >= PULL_THRESHOLD / 2) { // Check if pulled enough (half of threshold for release)

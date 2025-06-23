@@ -262,3 +262,7 @@ button[type="submit"]:hover {
 #refresh-indicator.visible {
     transform: translateY(0); /* Visible */
 }
+#refresh-indicator.armed {
+    background-color: #007bff; /* Change color when ready to refresh */
+    color: white;
+}

@@ -53,17 +53,21 @@ router.post('/', async (req, res, next) => {
 // PUT (update) a task
 router.put('/:id', async (req, res, next) => {
   try {
-    const task = await Task.findOne({ _id: req.params.id, user: req.user._id });
-    if (!task) {
+    const { title, completed, priority } = req.body;
+    const updates = {};
+    if (title != null) updates.title = title;
+    if (completed != null) updates.completed = completed;
+    if (priority != null) updates.priority = priority;
+
+    const updatedTask = await Task.findOneAndUpdate(
+      { _id: req.params.id, user: req.user._id },
+      { $set: updates },
+      { new: true, runValidators: true } // Return the updated document and run schema validators
+    );
+
+    if (!updatedTask) {
       return res.status(404).json({ message: 'Task not found or you do not have permission to edit it.' });
     }
-
-    if (req.body.title != null) task.title = req.body.title;
-    if (req.body.completed != null) task.completed = req.body.completed;
-    if (req.body.priority != null) task.priority = req.body.priority;
-
-    
-    const updatedTask = await task.save();
     res.json(updatedTask);
   } catch (error) {
     next(error);
