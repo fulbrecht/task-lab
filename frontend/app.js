@@ -19,6 +19,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const authError = document.getElementById('auth-error');
     const goToBrowseLink = document.getElementById('go-to-browse');
     const goToDashboardLink = document.getElementById('go-to-dashboard');
+    const refreshIndicator = document.getElementById('refresh-indicator');
+
+    // Pull-to-refresh variables
+    let startY = 0;
+    let isPulling = false;
+    const PULL_THRESHOLD = 80; // Pixels to pull down to trigger refresh
 
     // --- UI Toggling ---
     const showLoginView = () => {
@@ -124,6 +130,50 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // --- Pull-to-refresh Event Listeners ---
+    document.body.addEventListener('touchstart', (e) => {
+        // Only start pull-to-refresh if at the very top of the page
+        if (window.scrollY === 0) {
+            startY = e.touches[0].clientY;
+            isPulling = true;
+            refreshIndicator.style.transition = 'none'; // Disable transition during pull
+        }
+    });
+
+    document.body.addEventListener('touchmove', (e) => {
+        if (!isPulling) return;
+
+        const currentY = e.touches[0].clientY;
+        const pullDistance = currentY - startY;
+
+        if (pullDistance > 0 && window.scrollY === 0) {
+            e.preventDefault(); // Prevent native scroll
+            // Move the indicator down as the user pulls
+            refreshIndicator.style.transform = `translateY(${Math.min(pullDistance / 2, PULL_THRESHOLD)}px)`;
+            refreshIndicator.textContent = pullDistance > PULL_THRESHOLD ? 'Release to refresh' : 'Pull to refresh';
+            refreshIndicator.classList.add('visible');
+        } else {
+            // If user scrolls down or moves up, stop pulling
+            isPulling = false;
+            refreshIndicator.classList.remove('visible');
+            refreshIndicator.style.transform = 'translateY(-100%)';
+        }
+    });
+
+    document.body.addEventListener('touchend', async () => {
+        if (!isPulling) return;
+        isPulling = false;
+        refreshIndicator.style.transition = 'transform 0.2s ease-out'; // Re-enable transition
+
+        const pullDistance = parseFloat(refreshIndicator.style.transform.replace('translateY(', '').replace('px)', ''));
+        if (pullDistance >= PULL_THRESHOLD / 2) { // Check if pulled enough (half of threshold for release)
+            refreshIndicator.textContent = 'Refreshing...';
+            await refreshCurrentView(); // Trigger refresh
+        }
+        refreshIndicator.classList.remove('visible');
+        refreshIndicator.style.transform = 'translateY(-100%)';
+    });
+
     // --- Event Delegation for both Task Lists ---
     document.body.addEventListener('click', (e) => {
         const li = e.target.closest('li[data-id]');
@@ -163,6 +213,15 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             showLoginView();
         }
+    }
+
+    async function refreshCurrentView() {
+        if (appContainer.style.display === 'block') {
+            await loadDashboardTasks();
+        } else if (browseContainer.style.display === 'block') {
+            await loadAllTasks();
+        }
+        refreshIndicator.textContent = 'Pull to refresh'; // Reset text
     }
 
     async function loadDashboardTasks() {

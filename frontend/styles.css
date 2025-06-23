@@ -243,3 +243,22 @@ button[type="submit"]:hover {
 .header-link:hover {
     text-decoration: underline;
 }
+
+/* Pull-to-refresh indicator styles */
+#refresh-indicator {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    padding: 10px 0;
+    background-color: #e0e0e0;
+    color: #555;
+    font-size: 0.9rem;
+    transform: translateY(-100%); /* Hidden above the viewport */
+    transition: transform 0.2s ease-out;
+    z-index: 1000;
+}
+#refresh-indicator.visible {
+    transform: translateY(0); /* Visible */
+}
