@@ -1,3 +1,5 @@
+import * as api from './api.js';
+
 document.addEventListener('DOMContentLoaded', () => {
     const authContainer = document.getElementById('auth-container');
     const appContainer = document.getElementById('app-container');
@@ -12,8 +14,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const taskList = document.getElementById('task-list');
     const logoutBtn = document.getElementById('logout-btn');
     const authError = document.getElementById('auth-error');
-
-    const API_URL = '/api';
 
     // --- UI Toggling ---
     const showLoginView = () => {
@@ -53,51 +53,32 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         const username = document.getElementById('login-username').value;
         const password = document.getElementById('login-password').value;
+        authError.textContent = '';
         try {
-            const res = await fetch(`${API_URL}/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password }),
-            });
-            if (res.ok) {
-                showAppView();
-            } else {
-                const data = await res.json();
-                authError.textContent = data.message || 'Login failed.';
-            }
+            await api.login(username, password);
+            showAppView();
         } catch (error) {
-            authError.textContent = 'An error occurred. Please try again.';
+            authError.textContent = error.message;
         }
     });
 
     registerForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        authError.textContent = '';
         const username = document.getElementById('register-username').value;
         const password = document.getElementById('register-password').value;
         try {
-            const res = await fetch(`${API_URL}/register`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password }),
-            });
-            if (res.ok) {
-                showAppView();
-            } else {
-                const data = await res.json();
-                authError.textContent = data.message || 'Registration failed.';
-            }
+            await api.register(username, password);
+            showAppView();
         } catch (error) {
-            authError.textContent = 'An error occurred. Please try again.';
+            authError.textContent = error.message;
         }
     });
 
     logoutBtn.addEventListener('click', async () => {
         try {
-            const res = await fetch(`${API_URL}/logout`);
-            // Only switch views if the logout was successful on the server
-            if (res.ok) {
-                showLoginView();
-            }
+            await api.logout();
+            showLoginView();
         } catch (error) {
             console.error('Logout failed:', error);
         }
@@ -107,10 +88,12 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         const title = taskInput.value.trim();
         if (title) {
-            const success = await addTask(title);
-            if (success) {
+            try {
+                await api.addTask(title);
                 taskInput.value = '';
                 loadTasks();
+            } catch (error) {
+                alert(`Error: ${error.message}`);
             }
         }
     });
@@ -133,15 +116,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- API Calls ---
-    async function checkAuthStatus() {
+    // --- UI Rendering and State ---
+    async function initializeApp() {
         try {
-            const res = await fetch(`${API_URL}/user`);
-            if (res.ok) {
-                showAppView();
-            } else {
-                showLoginView();
-            }
+            await api.checkAuthStatus();
+            showAppView();
         } catch (error) {
             showLoginView();
         }
@@ -149,47 +128,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function loadTasks() {
         try {
-            const res = await fetch(`${API_URL}/tasks`);
-            if (!res.ok) {
-                if (res.status === 401) showLoginView();
-                return;
-            }
-            const tasks = await res.json();
-            taskList.innerHTML = '';
-            tasks.forEach(task => {
-                const li = document.createElement('li');
-                li.textContent = task.title;
-                li.className = task.completed ? 'completed' : '';
-                li.dataset.id = task._id;
-
-                const deleteBtn = document.createElement('button');
-                deleteBtn.textContent = 'Delete';
-                li.appendChild(deleteBtn);
-                taskList.appendChild(li);
-            });
+            const tasks = await api.loadTasks();
+            renderTasks(tasks);
         } catch (error) {
             console.error('Error loading tasks:', error);
+            showLoginView(); // If loading tasks fails, assume user is not logged in.
         }
     }
 
-    async function addTask(title) {
-        try {
-            const res = await fetch(`${API_URL}/tasks`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title }),
-            });
-            if (!res.ok) {
-                const errorData = await res.json();
-                alert(`Error: ${errorData.message || 'Could not add task.'}`);
-                return false;
-            }
-            return true;
-        } catch (error) {
-            console.error('Error adding task:', error);
-            alert('A network error occurred. Please try again.');
-            return false;
-        }
+    function renderTasks(tasks) {
+        taskList.innerHTML = '';
+        tasks.forEach(task => {
+            const li = document.createElement('li');
+            li.textContent = task.title;
+            li.className = task.completed ? 'completed' : '';
+            li.dataset.id = task._id;
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = 'Delete';
+            li.appendChild(deleteBtn);
+            taskList.appendChild(li);
+        });
     }
 
     async function deleteTask(id) {
@@ -199,13 +158,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const res = await fetch(`${API_URL}/tasks/${id}`, { method: 'DELETE' });
-            if (!res.ok) {
-                console.error('Failed to delete task. Server responded with ' + res.status);
-                loadTasks(); // Re-load list to revert the change on error
-            }
+            await api.deleteTask(id);
         } catch (error) {
-            console.error('Error deleting task:', error);
+            console.error('Failed to delete task:', error);
             loadTasks(); // Re-load list to revert the change on error
         }
     }
@@ -217,23 +172,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const res = await fetch(`${API_URL}/tasks/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ completed }),
-            });
-            if (!res.ok) {
-                console.error('Failed to update task. Server responded with ' + res.status);
-                // Revert the optimistic change on error
-                if (taskElement) taskElement.classList.toggle('completed', !completed);
-            }
+            await api.toggleTask(id, completed);
         } catch (error) {
-            console.error('Error updating task:', error);
+            console.error('Failed to update task:', error);
             // Revert the optimistic change on error
             if (taskElement) taskElement.classList.toggle('completed', !completed);
         }
     }
 
     // Initial check
-    checkAuthStatus();
+    initializeApp();
 });
