@@ -15,16 +15,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const taskPriorityInput = document.getElementById('task-priority');
     const dashboardTaskList = document.getElementById('dashboard-task-list');
     const browseTaskList = document.getElementById('browse-task-list');
-    const logoutBtn = document.getElementById('logout-btn');
     const authError = document.getElementById('auth-error');
     const goToBrowseLink = document.getElementById('go-to-browse');
     const goToDashboardLink = document.getElementById('go-to-dashboard');
-    // New refresh button references
-    const dashboardRefreshBtn = document.getElementById('dashboard-refresh-btn');
-    const browseRefreshBtn = document.getElementById('browse-refresh-btn');
+    // New global nav bar elements
+    const mainNav = document.getElementById('main-nav');
+    const usernameDisplay = document.getElementById('username-display');
+    const globalRefreshBtn = document.getElementById('global-refresh-btn');
+    const globalLogoutBtn = document.getElementById('global-logout-btn');
+
+    let currentUser = null;
 
     // --- UI Toggling ---
     const showLoginView = () => {
+        mainNav.style.display = 'none'; // Hide nav on login screen
         authContainer.style.display = 'block';
         appContainer.style.display = 'none';
         loginView.style.display = 'block';
@@ -34,6 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const showRegisterView = () => {
+        mainNav.style.display = 'none'; // Hide nav on register screen
         authContainer.style.display = 'block';
         appContainer.style.display = 'none';
         loginView.style.display = 'none';
@@ -42,14 +47,18 @@ document.addEventListener('DOMContentLoaded', () => {
         authError.textContent = '';
     };
 
-    const showAppView = () => {
+    const showAppView = (username = null) => {
+        mainNav.style.display = 'flex'; // Show nav when logged in
+        if (username) usernameDisplay.textContent = `Hello, ${username}`;
         authContainer.style.display = 'none';
         appContainer.style.display = 'block';
         browseContainer.style.display = 'none';
         loadDashboardTasks();
     };
 
-    const showBrowseView = () => {
+    const showBrowseView = (username = null) => {
+        mainNav.style.display = 'flex'; // Show nav when logged in
+        if (username) usernameDisplay.textContent = `Hello, ${username}`;
         authContainer.style.display = 'none';
         appContainer.style.display = 'none';
         browseContainer.style.display = 'block';
@@ -69,12 +78,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     goToBrowseLink.addEventListener('click', (e) => {
         e.preventDefault();
-        showBrowseView();
+        showBrowseView(currentUser);
     });
 
     goToDashboardLink.addEventListener('click', (e) => {
         e.preventDefault();
-        showAppView();
+        showAppView(currentUser);
     });
 
     loginForm.addEventListener('submit', async (e) => {
@@ -83,8 +92,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const password = document.getElementById('login-password').value;
         authError.textContent = '';
         try {
-            await api.login(username, password);
-            showAppView();
+            const data = await api.login(username, password);
+            currentUser = data.user.username;
+            showAppView(currentUser); // Pass username to showAppView
         } catch (error) {
             authError.textContent = error.message;
         }
@@ -96,16 +106,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const username = document.getElementById('register-username').value;
         const password = document.getElementById('register-password').value;
         try {
-            await api.register(username, password);
-            showAppView();
+            const data = await api.register(username, password);
+            currentUser = data.user.username;
+            showAppView(currentUser); // Pass username to showAppView
         } catch (error) {
             authError.textContent = error.message;
         }
     });
 
-    logoutBtn.addEventListener('click', async () => {
+    globalLogoutBtn.addEventListener('click', async () => { // Use globalLogoutBtn
         try {
             await api.logout();
+            currentUser = null;
             showLoginView();
         } catch (error) {
             console.error('Logout failed:', error);
@@ -128,8 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- Refresh Button Event Listeners ---
-    dashboardRefreshBtn.addEventListener('click', refreshCurrentView);
-    browseRefreshBtn.addEventListener('click', refreshCurrentView);
+    globalRefreshBtn.addEventListener('click', refreshCurrentView); // Use globalRefreshBtn
 
     // --- Event Delegation for both Task Lists ---
     // This listener is fine as it handles clicks on task items and delete buttons
@@ -167,10 +178,11 @@ document.addEventListener('DOMContentLoaded', () => {
     async function initializeApp() {
         try {
             const data = await api.checkAuthStatus();
-            if (!data || !data.user) throw new Error("Not authenticated");
-            showAppView();
+            if (!data || !data.user) throw new Error("Not authenticated"); // Ensure user data is present
+            currentUser = data.user.username;
+            showAppView(currentUser); // Pass username to showAppView
         } catch (error) {
-            showLoginView();
+            showLoginView(); // If checkAuthStatus fails, show login
         }
     }
 
@@ -242,9 +254,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function deleteTask(id) {
-        const taskElement = document.querySelector(`li[data-id="${id}"]`);
-        if (taskElement) {
-            taskElement.remove(); // Optimistically remove from UI
+        // Optimistically remove from all potential UI locations
+        const taskElements = document.querySelectorAll(`li[data-id="${id}"]`);
+        if (taskElements.length > 0) {
+            taskElements.forEach(el => el.remove());
         }
 
         try {

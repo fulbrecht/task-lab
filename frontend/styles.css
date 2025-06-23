@@ -1,3 +1,20 @@
+/* --- Theme Variables --- */
+/* Universal reset for html and body margins/paddings */
+html, body {
+    margin: 0;
+    padding: 0;
+}
+:root {
+    --primary-color: #007bff;
+    --main-nav-height: 60px; /* Approximate height of the fixed nav bar */
+    --primary-hover: #0056b3;
+    --secondary-color: #6c757d;
+    --secondary-hover: #5a6268;
+    --background-color: #f4f4f9;
+    --text-color: #333;
+    --high-priority: #e57373;
+}
+
 /* Universal Box-Sizing for predictable layouts */
 *, *::before, *::after {
     box-sizing: border-box;
@@ -6,13 +23,13 @@
 /* General Body & Container Styles */
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background-color: #f4f4f9;
-    color: #333;
+    background-color: var(--background-color);
+    color: var(--text-color);
     margin: 0;
-    padding: 20px;
+    padding: var(--main-nav-height) 20px 20px 20px; /* Revert to using nav height for top padding */
     display: flex;
-    justify-content: center;
-    align-items: flex-start;
+    flex-direction: column; /* Stack nav and containers vertically */
+    align-items: center; /* Center them horizontally */
     min-height: 100vh;
 }
 
@@ -20,7 +37,8 @@ body {
     width: 100%;
     max-width: 500px;
     background: #fff;
-    padding: 25px 30px;
+    padding: 25px 30px; /* Keep internal padding for content */
+    margin-top: 0; /* Remove margin-top as body padding now handles spacing */
     border-radius: 8px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
@@ -32,27 +50,41 @@ h1 {
     margin-bottom: 25px;
 }
 
-/* New header bar styles */
-.header-bar {
+/* New Main Navigation Bar Styles */
+#main-nav {
+    position: fixed; /* Stick to the viewport */
+    top: 0;
+    left: 0;
+    width: 100vw; /* Span the entire viewport width */
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0 30px; /* Adjust padding for a sleeker look */
+    height: var(--main-nav-height); /* Use the variable for height */
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 25px; /* Space below the header */
-    padding-bottom: 15px; /* Padding above the content */
-    border-bottom: 1px solid #eee; /* Separator line */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box; /* Include padding in width calculation */
+    z-index: 1000; /* Ensure it stays on top of other content */
 }
 
-.header-bar .header-title {
-    font-size: 2rem;
-    margin: 0; /* Remove default h1 margins */
-    text-align: left; /* Align title within the flex container */
-    flex-grow: 1; /* Allow title to take available space */
+#main-nav .nav-title {
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin: 0;
 }
 
-.header-bar .header-actions {
+#main-nav .nav-actions {
     display: flex;
     align-items: center;
-    gap: 15px; /* Space between buttons/links */
+    gap: 15px;
+}
+
+#username-display {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: white; /* Make username text white */
+    opacity: 0.9; /* Slightly less prominent than title */
 }
 
 h2 {
@@ -95,7 +127,7 @@ input[type="password"] {
 button[type="submit"] {
     padding: 12px 20px;
     border: none;
-    background-color: #007bff;
+    background-color: var(--primary-color);
     color: white;
     border-radius: 4px;
     cursor: pointer;
@@ -104,7 +136,7 @@ button[type="submit"] {
 }
 
 button[type="submit"]:hover {
-    background-color: #0056b3;
+    background-color: var(--primary-hover);
 }
 
 /* Auth Specific Styles */
@@ -114,7 +146,7 @@ button[type="submit"]:hover {
 }
 
 #auth-container a {
-    color: #007bff;
+    color: var(--primary-color);
     text-decoration: none;
     font-weight: 500;
 }
@@ -153,6 +185,36 @@ button[type="submit"]:hover {
 
 #task-form button {
     margin-bottom: 0;
+}
+
+/* Media query for smaller screens (e.g., mobile devices) */
+@media (max-width: 520px) {
+    /* Adjust the main container padding for very small screens if needed */
+    body {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .container {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    #task-form {
+        flex-direction: column; /* Stack elements vertically */
+        align-items: stretch; /* Make them fill the width */
+    }
+
+    #task-input,
+    #task-form select,
+    #task-form button {
+        width: 100%; /* Make them take full width when stacked */
+        margin-bottom: 10px; /* Add vertical spacing between stacked elements */
+    }
+
+    #task-form button {
+        margin-bottom: 0; /* The last button doesn't need bottom margin */
+    }
 }
 
 #dashboard-task-list,
@@ -199,7 +261,7 @@ button[type="submit"]:hover {
     margin-right: 15px;
     flex-shrink: 0;
 }
-.priority-1 { background-color: #e57373; } /* High */
+.priority-1 { background-color: var(--high-priority); } /* High */
 .priority-2 { background-color: #ffb74d; } /* Medium */
 .priority-3 { background-color: #81c784; } /* Low */
 
@@ -219,8 +281,8 @@ button[type="submit"]:hover {
 
 .task-controls button {
     background: none;
-    border: 1px solid #e57373;
-    color: #e57373;
+    border: 1px solid var(--high-priority);
+    color: var(--high-priority);
     cursor: pointer;
     padding: 4px 8px;
     font-size: 0.8rem;
@@ -230,23 +292,8 @@ button[type="submit"]:hover {
 }
 
 .task-controls button:hover {
-    background: #e57373;
+    background: var(--high-priority);
     color: white;
-}
-
-#logout-btn {
-    background: #6c757d;
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    font-size: 0.9rem;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-}
-
-#logout-btn:hover {
-    background: #5a6268;
 }
 
 .header-link {
@@ -260,23 +307,34 @@ button[type="submit"]:hover {
     text-decoration: underline;
 }
 
-/* Refresh button styles */
-.refresh-btn {
+/* Refresh button styles (for global nav bar) */
+#global-refresh-btn {
     background: none;
     border: none;
-    font-size: 1.5rem; /* Larger icon */
-    color: #6c757d;
+    font-size: 1.5rem;
+    color: white;
     cursor: pointer;
     padding: 0;
-    line-height: 1; /* Ensure proper vertical alignment */
+    line-height: 1;
     transition: color 0.2s ease;
 }
 
-.refresh-btn:hover {
-    color: #333;
+#global-refresh-btn:hover {
+    color: #e0e0e0;
 }
 
-/* Logout button is now part of .header-actions, so its styles are fine */
-#logout-btn {
-    /* No changes needed here, existing styles are sufficient */
+/* Logout button styles (for global nav bar) */
+#global-logout-btn {
+    background: var(--secondary-color);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+#global-logout-btn:hover {
+    background: var(--secondary-hover);
 }
