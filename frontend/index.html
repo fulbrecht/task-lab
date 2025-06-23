@@ -31,14 +31,30 @@
         <p id="auth-error" class="error-message"></p>
     </div>
 
+    <!-- Main App View (Dashboard) -->
     <div id="app-container" class="container" style="display: none;">
-        <h1>Task Lab <button id="logout-btn">Logout</button></h1>
+        <h1>Dashboard <button id="logout-btn">Logout</button></h1>
+        <p class="subtitle">Your top 3 highest-priority tasks. <a href="#" id="go-to-browse">Browse all &rarr;</a></p>
+        <ul id="dashboard-task-list"></ul>
+        <hr>
+        <h2>Add a New Task</h2>
         <form id="task-form">
             <input type="text" id="task-input" placeholder="Add a new task..." required>
+            <select id="task-priority" title="Set task priority">
+                <option value="1">High</option>
+                <option value="2">Medium</option>
+                <option value="3" selected>Low</option>
+            </select>
             <button type="submit">Add Task</button>
         </form>
-        <ul id="task-list"></ul>
     </div>
+
+    <!-- New Browse All Tasks View -->
+    <div id="browse-container" class="container" style="display: none;">
+        <h1>All Tasks <a href="#" id="go-to-dashboard" class="header-link">&larr; Dashboard</a></h1>
+        <ul id="browse-task-list"></ul>
+    </div>
+
     <script src="/app.js" type="module"></script>
 </body>
 </html>

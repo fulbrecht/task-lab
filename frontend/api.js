@@ -46,16 +46,21 @@ export async function checkAuthStatus() {
     return handleResponse(res);
 }
 
+export async function loadDashboardTasks() {
+    const res = await fetch(`${API_BASE_URL}/tasks/dashboard`);
+    return handleResponse(res);
+}
+
 export async function loadTasks() {
     const res = await fetch(`${API_BASE_URL}/tasks`);
     return handleResponse(res);
 }
 
-export async function addTask(title) {
+export async function addTask(title, priority) {
     const res = await fetch(`${API_BASE_URL}/tasks`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title }),
+        body: JSON.stringify({ title, priority }),
     });
     return handleResponse(res);
 }
@@ -65,11 +70,11 @@ export async function deleteTask(id) {
     return handleResponse(res);
 }
 
-export async function toggleTask(id, completed) {
+export async function updateTask(id, updates) {
     const res = await fetch(`${API_BASE_URL}/tasks/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ completed }),
+        body: JSON.stringify(updates),
     });
     return handleResponse(res);
 }
