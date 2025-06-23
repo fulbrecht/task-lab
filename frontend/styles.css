@@ -32,11 +32,27 @@ h1 {
     margin-bottom: 25px;
 }
 
-/* Apply flexbox only to the h1 in the app view for the logout button */
-#app-container h1 {
+/* New header bar styles */
+.header-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: 25px; /* Space below the header */
+    padding-bottom: 15px; /* Padding above the content */
+    border-bottom: 1px solid #eee; /* Separator line */
+}
+
+.header-bar .header-title {
+    font-size: 2rem;
+    margin: 0; /* Remove default h1 margins */
+    text-align: left; /* Align title within the flex container */
+    flex-grow: 1; /* Allow title to take available space */
+}
+
+.header-bar .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Space between buttons/links */
 }
 
 h2 {
@@ -244,25 +260,23 @@ button[type="submit"]:hover {
     text-decoration: underline;
 }
 
-/* Pull-to-refresh indicator styles */
-#refresh-indicator {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    text-align: center;
-    padding: 10px 0;
-    background-color: #e0e0e0;
-    color: #555;
-    font-size: 0.9rem;
-    transform: translateY(-100%); /* Hidden above the viewport */
-    transition: transform 0.2s ease-out;
-    z-index: 1000;
+/* Refresh button styles */
+.refresh-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem; /* Larger icon */
+    color: #6c757d;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1; /* Ensure proper vertical alignment */
+    transition: color 0.2s ease;
 }
-#refresh-indicator.visible {
-    transform: translateY(0); /* Visible */
+
+.refresh-btn:hover {
+    color: #333;
 }
-#refresh-indicator.armed {
-    background-color: #007bff; /* Change color when ready to refresh */
-    color: white;
+
+/* Logout button is now part of .header-actions, so its styles are fine */
+#logout-btn {
+    /* No changes needed here, existing styles are sufficient */
 }

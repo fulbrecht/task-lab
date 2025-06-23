@@ -19,12 +19,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const authError = document.getElementById('auth-error');
     const goToBrowseLink = document.getElementById('go-to-browse');
     const goToDashboardLink = document.getElementById('go-to-dashboard');
-    const refreshIndicator = document.getElementById('refresh-indicator');
-
-    // Pull-to-refresh variables
-    let startY = 0;
-    let isPulling = false;
-    const PULL_THRESHOLD = 80; // Pixels to pull down to trigger refresh
+    // New refresh button references
+    const dashboardRefreshBtn = document.getElementById('dashboard-refresh-btn');
+    const browseRefreshBtn = document.getElementById('browse-refresh-btn');
 
     // --- UI Toggling ---
     const showLoginView = () => {
@@ -125,67 +122,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 taskInput.value = '';
                 loadDashboardTasks();
             } catch (error) {
-                alert(`Error: ${error.message}`);
+                authError.textContent = `Error: ${error.message}`; // Use authError for general messages
             }
         }
     });
 
-    // --- Pull-to-refresh Event Listeners ---
-    document.body.addEventListener('touchstart', (e) => {
-        console.log('touchstart detected', e.touches[0].clientY, window.scrollY);
-        // Only start pull-to-refresh if at the very top of the page
-        if (window.scrollY === 0) {
-            startY = e.touches[0].clientY;
-            isPulling = true;
-            refreshIndicator.style.transition = 'none'; // Disable transition during pull
-        }
-    });
-
-    document.body.addEventListener('touchmove', (e) => {
-        if (!isPulling) return;
-        console.log('touchmove detected', e.touches[0].clientY);
-
-        const currentY = e.touches[0].clientY;
-        const pullDistance = currentY - startY;
-
-        if (pullDistance > 0 && window.scrollY === 0) {
-            e.preventDefault(); // Prevent native scroll
-            // Move the indicator down as the user pulls
-            refreshIndicator.style.transform = `translateY(${Math.min(pullDistance / 2, PULL_THRESHOLD)}px)`;
-            refreshIndicator.classList.add('visible'); // Ensure it's visible during pull
-
-            if (pullDistance > PULL_THRESHOLD) {
-                refreshIndicator.classList.add('armed');
-                refreshIndicator.textContent = 'Release to refresh'; // Text for armed state
-            } else {
-                refreshIndicator.classList.remove('armed');
-                refreshIndicator.textContent = 'Pull to refresh'; // Text for unarmed state
-            }
-        } else {
-            // If user scrolls down or moves up, stop pulling
-            isPulling = false;
-            refreshIndicator.classList.remove('visible');
-            refreshIndicator.style.transform = 'translateY(-100%)';
-        }
-    });
-
-    document.body.addEventListener('touchend', async () => {
-        console.log('touchend detected');
-        if (!isPulling) return;
-        isPulling = false;
-        refreshIndicator.style.transition = 'transform 0.2s ease-out'; // Re-enable transition
-        refreshIndicator.classList.remove('armed'); // Remove armed state on release
-
-        const pullDistance = parseFloat(refreshIndicator.style.transform.replace('translateY(', '').replace('px)', ''));
-        if (pullDistance >= PULL_THRESHOLD / 2) { // Check if pulled enough (half of threshold for release)
-            refreshIndicator.textContent = 'Refreshing...';
-            await refreshCurrentView(); // Trigger refresh
-        }
-        refreshIndicator.classList.remove('visible');
-        refreshIndicator.style.transform = 'translateY(-100%)';
-    });
+    // --- Refresh Button Event Listeners ---
+    dashboardRefreshBtn.addEventListener('click', refreshCurrentView);
+    browseRefreshBtn.addEventListener('click', refreshCurrentView);
 
     // --- Event Delegation for both Task Lists ---
+    // This listener is fine as it handles clicks on task items and delete buttons
+    // It does not interfere with the new refresh buttons.
     document.body.addEventListener('click', (e) => {
         const li = e.target.closest('li[data-id]');
         if (!li) return;
@@ -227,12 +175,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function refreshCurrentView() {
+        // No refresh indicator to reset text for, just trigger the load
         if (appContainer.style.display === 'block') {
             await loadDashboardTasks();
         } else if (browseContainer.style.display === 'block') {
             await loadAllTasks();
         }
-        refreshIndicator.textContent = 'Pull to refresh'; // Reset text
     }
 
     async function loadDashboardTasks() {

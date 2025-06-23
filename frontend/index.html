@@ -8,7 +8,14 @@
     <link rel="manifest" href="/manifest.json">
 </head>
 <body>
-    <div id="refresh-indicator">Pull to refresh</div>
+    <nav id="main-nav" style="display: none;">
+        <span class="nav-title">Task Lab</span>
+        <div class="nav-actions">
+            <span id="username-display"></span>
+            <button id="global-refresh-btn" class="refresh-btn" title="Refresh">&#x21bb;</button>
+            <button id="global-logout-btn">Logout</button>
+        </div>
+    </nav>
     <div id="auth-container" class="container">
         <h1>Task Lab</h1>
         <div id="login-view">
@@ -34,7 +41,7 @@
 
     <!-- Main App View (Dashboard) -->
     <div id="app-container" class="container" style="display: none;">
-        <h1>Dashboard <button id="logout-btn">Logout</button></h1>
+        <h1>Dashboard</h1>
         <p class="subtitle">Your top 3 highest-priority tasks. <a href="#" id="go-to-browse">Browse all &rarr;</a></p>
         <ul id="dashboard-task-list"></ul>
         <hr>
@@ -52,7 +59,8 @@
 
     <!-- New Browse All Tasks View -->
     <div id="browse-container" class="container" style="display: none;">
-        <h1>All Tasks <a href="#" id="go-to-dashboard" class="header-link">&larr; Dashboard</a></h1>
+        <h1>All Tasks</h1>
+        <p class="subtitle"><a href="#" id="go-to-dashboard" class="header-link">&larr; Dashboard</a></p>
         <ul id="browse-task-list"></ul>
     </div>
 
