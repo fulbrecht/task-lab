@@ -72,6 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
         mainNav.style.display = 'flex'; // Show nav when logged in
         if (username) usernameDisplay.textContent = `Hello, ${username}`;
         mainMenu.classList.remove('open'); // Ensure menu is closed
+        hamburgerMenuBtn.classList.remove('open'); // Ensure hamburger icon is reset
         showTaskFormBtn.style.display = 'block'; // Show FAB on dashboard
         authContainer.style.display = 'none';
         appContainer.style.display = 'block';
@@ -84,6 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
         mainNav.style.display = 'flex'; // Show nav when logged in
         if (username) usernameDisplay.textContent = `Hello, ${username}`;
         mainMenu.classList.remove('open'); // Ensure menu is closed
+        hamburgerMenuBtn.classList.remove('open'); // Ensure hamburger icon is reset
         showTaskFormBtn.style.display = 'none'; // Hide FAB on browse page
         authContainer.style.display = 'none';
         appContainer.style.display = 'none';
@@ -107,6 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         showBrowseView(currentUser);
         mainMenu.classList.remove('open'); // Close menu on navigation
+        hamburgerMenuBtn.classList.remove('open'); // Reset hamburger icon
     });
 
     goToDashboardLink.addEventListener('click', (e) => {
@@ -186,6 +189,85 @@ document.addEventListener('DOMContentLoaded', () => {
         authError.textContent = ''; // Clear any error messages when opening form
     });
 
+    // New function to handle clicking on the edit pencil icon
+    function handleEditClick(event) {
+        const li = event.target.closest('li[data-id]');
+        if (!li) return;
+
+        const taskId = li.dataset.id;
+        // Find the span.task-title within this specific li
+        const currentTitleSpan = li.querySelector('.task-title');
+
+        // Prevent entering edit mode if already an input
+        if (currentTitleSpan.tagName === 'INPUT') return;
+
+        const originalTitle = currentTitleSpan.textContent;
+
+        // Create input element
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = originalTitle;
+        input.className = 'task-title-edit-input'; // Add a class for styling
+
+        // Replace span with input
+        currentTitleSpan.replaceWith(input);
+        input.focus();
+
+        // Event listeners for the input
+        input.addEventListener('blur', () => saveOrCancelEdit(li, taskId, input, originalTitle));
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault(); // Prevent new line in input
+                input.blur(); // Trigger blur to save
+            } else if (e.key === 'Escape') {
+                cancelEdit(li, taskId, input, originalTitle);
+            }
+        });
+    }
+
+    // Helper function to save or cancel an edit
+    async function saveOrCancelEdit(li, taskId, inputElement, originalTitle) {
+        const newTitle = inputElement.value.trim();
+
+        if (newTitle === originalTitle || newTitle === '') {
+            // No change or empty, revert to original title
+            cancelEdit(li, taskId, inputElement, originalTitle);
+            return;
+        }
+
+        try {
+            await api.updateTask(taskId, { title: newTitle });
+            // Re-render dashboard/browse to ensure consistency and re-sort if needed
+            loadDashboardTasks();
+            loadAllTasks();
+        } catch (error) {
+            console.error('Failed to update task title:', error);
+            authError.textContent = `Error updating task: ${error.message}`;
+            // Revert to original title on error
+            cancelEdit(li, taskId, inputElement, originalTitle);
+        }
+    }
+
+    // Helper function to cancel an edit and revert to original title
+    function cancelEdit(li, taskId, inputElement, originalTitle) {
+        const originalTitleSpan = document.createElement('span');
+        originalTitleSpan.className = 'task-title';
+        originalTitleSpan.textContent = originalTitle;
+        // No need to re-attach handleEditClick here, as it's now on the pencil icon
+        inputElement.replaceWith(originalTitleSpan);
+    }
+
+    // Close add task form when clicking outside
+    document.addEventListener('click', (event) => {
+        // Check if the add task form is open
+        if (addTaskContainer.style.display === 'block') {
+            // Check if the click target is NOT the FAB AND NOT inside the add task form itself
+            if (!showTaskFormBtn.contains(event.target) && !addTaskContainer.contains(event.target)) {
+                hideAddTaskFormAndShowFab();
+            }
+        }
+    });
+
     // Close hamburger menu when clicking outside
     document.addEventListener('click', (event) => {
         // Check if the menu is open
@@ -205,6 +287,74 @@ document.addEventListener('DOMContentLoaded', () => {
 
     cancelAddTaskBtn.addEventListener('click', hideAddTaskFormAndShowFab); // Hide form on cancel click
 
+    // New function to handle clicking on a task title to edit
+    function handleTitleClick(event) {
+        const li = event.target.closest('li[data-id]');
+        if (!li) return;
+
+        const taskId = li.dataset.id;
+        const currentTitleSpan = event.target; // This is the span.task-title
+
+        // Prevent entering edit mode if already an input or if it's a completed task (optional, but good UX)
+        if (currentTitleSpan.tagName === 'INPUT') return; // Already an input
+        // if (li.classList.contains('completed')) return; // Optionally prevent editing completed tasks
+
+        const originalTitle = currentTitleSpan.textContent;
+
+        // Create input element
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = originalTitle;
+        input.className = 'task-title-edit-input'; // Add a class for styling
+
+        // Replace span with input
+        currentTitleSpan.replaceWith(input);
+        input.focus();
+
+        // Event listeners for the input
+        input.addEventListener('blur', () => saveOrCancelEdit(li, taskId, input, originalTitle));
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault(); // Prevent new line in input
+                input.blur(); // Trigger blur to save
+            } else if (e.key === 'Escape') {
+                cancelEdit(li, taskId, input, originalTitle);
+            }
+        });
+    }
+
+    // Helper function to save or cancel an edit
+    async function saveOrCancelEdit(li, taskId, inputElement, originalTitle) {
+        const newTitle = inputElement.value.trim();
+
+        if (newTitle === originalTitle || newTitle === '') {
+            // No change or empty, revert to original title
+            cancelEdit(li, taskId, inputElement, originalTitle);
+            return;
+        }
+
+        try {
+            await api.updateTask(taskId, { title: newTitle });
+            // Re-render dashboard/browse to ensure consistency and re-sort if needed
+            loadDashboardTasks();
+            loadAllTasks();
+        } catch (error) {
+            console.error('Failed to update task title:', error);
+            authError.textContent = `Error updating task: ${error.message}`;
+            // Revert to original title on error
+            cancelEdit(li, taskId, inputElement, originalTitle);
+        }
+    }
+
+    // Helper function to cancel an edit and revert to original title
+    function cancelEdit(li, taskId, inputElement, originalTitle) {
+        const originalTitleSpan = document.createElement('span');
+        originalTitleSpan.className = 'task-title';
+        originalTitleSpan.textContent = originalTitle;
+        originalTitleSpan.addEventListener('click', handleTitleClick); // Re-attach click listener
+        inputElement.replaceWith(originalTitleSpan);
+    }
+
     // --- Refresh Button Event Listeners ---
     globalRefreshBtn.addEventListener('click', refreshCurrentView); // Use globalRefreshBtn
 
@@ -218,11 +368,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const id = li.dataset.id;
 
         // Handle delete button click
-        if (e.target.matches('.task-controls button')) {
+        if (e.target.matches('.task-controls .delete-task-btn')) { // Target specific delete button
             deleteTask(id);
         } 
-        // Handle completion toggle (clicking on the title)
-        else if (e.target.matches('.task-title')) {
+        // Handle edit button click
+        else if (e.target.matches('.task-controls .edit-task-btn')) { // Target specific edit button
+            handleEditClick(e);
+        }
+        // Handle completion toggle (clicking on the title span)
+        else if (e.target.matches('.task-title') && e.target.tagName === 'SPAN') {
             const isCompleted = li.classList.contains('completed');
             toggleTaskCompletion(id, !isCompleted);
         }
@@ -320,8 +474,15 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             controlsContainer.appendChild(prioritySelect);
         }
+        
+        // Add the new edit button
+        const editBtn = document.createElement('button');
+        editBtn.className = 'edit-task-btn';
+        editBtn.innerHTML = '&#9998;'; // Unicode for pencil icon
+        controlsContainer.appendChild(editBtn);
 
         const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'delete-task-btn'; // Add a class for specific targeting
         deleteBtn.textContent = 'Delete';
         controlsContainer.appendChild(deleteBtn);
         
