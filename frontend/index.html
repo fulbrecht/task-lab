@@ -11,9 +11,19 @@
     <nav id="main-nav" style="display: none;">
         <span class="nav-title">Task Lab</span>
         <div class="nav-actions">
-            <span id="username-display"></span>
-            <button id="global-refresh-btn" class="refresh-btn" title="Refresh">&#x21bb;</button>
-            <button id="global-logout-btn">Logout</button>
+            <button id="hamburger-menu-btn" class="hamburger-menu-btn" title="Open Menu">
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+            </button>
+        </div>
+    </nav>
+
+    <div id="main-menu" class="main-menu">
+        <span id="username-display" class="menu-item"></span>
+        <a href="#" id="go-to-browse" class="menu-item">Browse All Tasks</a>
+        <button id="global-refresh-btn" class="menu-item refresh-btn" title="Refresh">&#x21bb; Refresh</button>
+        <button id="global-logout-btn" class="menu-item">Logout</button>
         </div>
     </nav>
     <div id="auth-container" class="container">
@@ -42,7 +52,7 @@
     <!-- Main App View (Dashboard) -->
     <div id="app-container" class="container" style="display: none;">
         <h1>Dashboard</h1>
-        <p class="subtitle">Your top 3 highest-priority tasks. <a href="#" id="go-to-browse">Browse all &rarr;</a></p>
+        <p class="subtitle">Your top 3 highest-priority tasks.</p>
         <ul id="dashboard-task-list"></ul>
     </div>
 
@@ -68,7 +78,7 @@
         </form>
     </div>
 
-    <button id="show-task-form-btn" class="fab" title="Add New Task" style="display: none;">+</button>
+    <button id="show-task-form-btn" class="fab" title="Add New Task">+</button>
 
     <script src="/app.js" type="module"></script>
 </body>

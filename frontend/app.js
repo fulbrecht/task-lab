@@ -24,7 +24,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const taskPriorityInput = document.getElementById('task-priority');
     const dashboardTaskList = document.getElementById('dashboard-task-list');
     const browseTaskList = document.getElementById('browse-task-list');
-    const authError = document.getElementById('auth-error');
     const goToBrowseLink = document.getElementById('go-to-browse');
     const goToDashboardLink = document.getElementById('go-to-dashboard');
     // New global nav bar elements
@@ -32,7 +31,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const usernameDisplay = document.getElementById('username-display');
     const globalRefreshBtn = document.getElementById('global-refresh-btn');
     const globalLogoutBtn = document.getElementById('global-logout-btn');
+    const hamburgerMenuBtn = document.getElementById('hamburger-menu-btn');
+    const mainMenu = document.getElementById('main-menu');
     // New add task elements
+    const authError = document.getElementById('auth-error'); // Moved for better scope
     const addTaskContainer = document.getElementById('add-task-container');
     const showTaskFormBtn = document.getElementById('show-task-form-btn');
     const cancelAddTaskBtn = document.getElementById('cancel-add-task-btn');
@@ -47,6 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loginView.style.display = 'block';
         registerView.style.display = 'none';
         browseContainer.style.display = 'none';
+        mainMenu.classList.remove('open'); // Ensure menu is closed
         addTaskContainer.style.display = 'none'; // Ensure fixed form is hidden
         showTaskFormBtn.style.display = 'none'; // Hide FAB
         authError.textContent = '';
@@ -59,6 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loginView.style.display = 'none';
         registerView.style.display = 'block';
         browseContainer.style.display = 'none';
+        mainMenu.classList.remove('open'); // Ensure menu is closed
         addTaskContainer.style.display = 'none'; // Ensure fixed form is hidden
         showTaskFormBtn.style.display = 'none'; // Hide FAB
         authError.textContent = '';
@@ -67,6 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const showAppView = (username = null) => {
         mainNav.style.display = 'flex'; // Show nav when logged in
         if (username) usernameDisplay.textContent = `Hello, ${username}`;
+        mainMenu.classList.remove('open'); // Ensure menu is closed
         showTaskFormBtn.style.display = 'block'; // Show FAB on dashboard
         authContainer.style.display = 'none';
         appContainer.style.display = 'block';
@@ -78,6 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const showBrowseView = (username = null) => {
         mainNav.style.display = 'flex'; // Show nav when logged in
         if (username) usernameDisplay.textContent = `Hello, ${username}`;
+        mainMenu.classList.remove('open'); // Ensure menu is closed
         showTaskFormBtn.style.display = 'none'; // Hide FAB on browse page
         authContainer.style.display = 'none';
         appContainer.style.display = 'none';
@@ -100,6 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
     goToBrowseLink.addEventListener('click', (e) => {
         e.preventDefault();
         showBrowseView(currentUser);
+        mainMenu.classList.remove('open'); // Close menu on navigation
     });
 
     goToDashboardLink.addEventListener('click', (e) => {
@@ -177,6 +184,11 @@ document.addEventListener('DOMContentLoaded', () => {
         showTaskFormBtn.style.display = isVisible ? 'block' : 'none'; // Toggle FAB visibility
         if (!isVisible) taskInput.focus(); // Focus the input when the form appears
         authError.textContent = ''; // Clear any error messages when opening form
+    });
+
+    hamburgerMenuBtn.addEventListener('click', () => {
+        mainMenu.classList.toggle('open');
+        hamburgerMenuBtn.classList.toggle('open'); // Animate hamburger icon
     });
 
     cancelAddTaskBtn.addEventListener('click', hideAddTaskFormAndShowFab); // Hide form on cancel click
@@ -260,11 +272,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderTasks(tasks, listElement, showControls) {
         listElement.innerHTML = ''; // Clear the list
         const fragment = document.createDocumentFragment(); // Create a fragment to hold new elements
-        tasks.forEach(task => fragment.appendChild(createTaskElement(task, showControls)));
+        const isDashboardView = (listElement === dashboardTaskList); // Determine if it's the dashboard
+        tasks.forEach(task => fragment.appendChild(createTaskElement(task, showControls, isDashboardView)));
         listElement.appendChild(fragment); // Append all new elements at once
     }
 
-    function createTaskElement(task, showControls) {
+    function createTaskElement(task, showControls, isDashboardView) {
         const li = document.createElement('li');
         li.className = task.completed ? 'completed' : '';
         li.dataset.id = task._id;
@@ -272,6 +285,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const priorityIndicator = document.createElement('div');
         priorityIndicator.className = `priority-indicator priority-${task.priority}`;
         li.appendChild(priorityIndicator);
+
+        if (isDashboardView) { // Apply priority sizing only for dashboard tasks
+            li.classList.add(`priority-size-${task.priority}`);
+        }
 
         const titleSpan = document.createElement('span');
         titleSpan.className = 'task-title';

@@ -88,6 +88,118 @@ h1 {
     opacity: 0.9; /* Slightly less prominent than title */
 }
 
+/* Hamburger Menu Button */
+.hamburger-menu-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    width: 30px;
+    height: 30px;
+    position: relative;
+    z-index: 1001; /* Ensure it's clickable above other elements */
+}
+
+.hamburger-menu-btn .bar {
+    width: 100%;
+    height: 3px;
+    background-color: white;
+    border-radius: 2px;
+    transition: all 0.3s ease-in-out;
+}
+
+/* Hamburger Menu Button Animation (to X) */
+.hamburger-menu-btn.open .bar:nth-child(1) {
+    transform: translateY(8px) rotate(45deg);
+}
+.hamburger-menu-btn.open .bar:nth-child(2) {
+    opacity: 0;
+}
+.hamburger-menu-btn.open .bar:nth-child(3) {
+    transform: translateY(-8px) rotate(-45deg);
+}
+
+/* Main Sliding Menu */
+#main-menu {
+    position: fixed;
+    top: 0; /* Start from the very top of the viewport */
+    right: 0;
+    width: 250px; /* Width of the sliding menu */
+    height: 100vh; /* Full viewport height */
+    background-color: #f8f8f8; /* Light background for the menu */
+    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
+    transform: translateX(100%); /* Hidden by default (slides off-screen to the right) */
+    transition: transform 0.3s ease-in-out;
+    z-index: 999; /* Below the main nav bar, but above content */
+    display: flex;
+    flex-direction: column;
+    padding-top: var(--main-nav-height); /* Push content below the fixed nav bar */
+}
+
+#main-menu.open {
+    transform: translateX(0); /* Slide into view */
+}
+
+/* Styles for items inside the menu */
+#main-menu .menu-item {
+    padding: 15px 20px;
+    border-bottom: 1px solid #eee;
+    text-align: left;
+    color: var(--text-color);
+    font-size: 1rem;
+    background: none;
+    border: none;
+    width: 100%;
+    cursor: pointer;
+    text-decoration: none; /* Ensure links in menu don't have default underline */
+    display: flex; /* Make it a flex container for consistent padding */
+    align-items: center;
+    gap: 10px; /* Space between icon and text if any */
+}
+
+#main-menu .menu-item:hover {
+    background-color: #e0e0e0;
+}
+
+/* Specific styles for username display within menu */
+#main-menu #username-display {
+    font-weight: bold;
+    color: var(--primary-color); /* Or a darker text color */
+    padding-bottom: 10px;
+    padding-left: 20px; /* Match other menu items */
+    padding-right: 20px; /* Match other menu items */
+    margin-top: 15px; /* Space from top of menu */
+    margin-bottom: 10px;
+    border-bottom: 2px solid var(--primary-color);
+}
+
+/* Adjust refresh button within menu */
+#main-menu #global-refresh-btn {
+    font-size: 1rem; /* Smaller icon in menu */
+    color: var(--text-color);
+    padding-left: 20px; /* Match other menu items */
+    text-align: left;
+}
+
+/* Adjust logout button within menu */
+#main-menu #global-logout-btn {
+    background: var(--secondary-color);
+    color: white;
+    text-align: center; /* Center text in button */
+    margin: 15px 20px; /* Add margin to separate from other items */
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+#main-menu #global-logout-btn:hover {
+    background: var(--secondary-hover);
+}
+
 h2 {
     text-align: center;
     margin-top: 0;
@@ -280,6 +392,42 @@ button[type="submit"]:hover {
     list-style: none;
     padding: 0;
     margin-top: 25px;
+}
+
+/* Sizing based on priority for dashboard tasks */
+#dashboard-task-list li {
+    transition: all 0.3s ease; /* Smooth transition for size changes */
+    margin-bottom: 10px; /* Add space between tasks */
+    border-radius: 8px; /* Add some rounded corners to the task items */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); /* Subtle shadow for depth */
+}
+
+#dashboard-task-list li:last-child {
+    margin-bottom: 0; /* No margin for the last one */
+}
+
+#dashboard-task-list li.priority-size-1 {
+    font-size: 1.3rem;
+    padding: 20px 15px;
+    min-height: 80px; /* Ensure a minimum height */
+    border: 2px solid var(--high-priority); /* Distinct high-priority border */
+    background-color: #fff8f8; /* Very light red background */
+}
+
+#dashboard-task-list li.priority-size-2 {
+    font-size: 1.1rem;
+    padding: 18px 12px;
+    min-height: 70px; /* Ensure a minimum height */
+    border: 1px solid #ffb74d; /* Medium priority border */
+    background-color: #fffdf8; /* Very light orange background */
+}
+
+#dashboard-task-list li.priority-size-3 {
+    font-size: 1rem;
+    padding: 15px 10px;
+    min-height: 60px; /* Ensure a minimum height */
+    border: 1px solid #81c784; /* Low priority border */
+    background-color: #f8fff8; /* Very light green background */
 }
 
 #dashboard-task-list li,
