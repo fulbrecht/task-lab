@@ -3,6 +3,7 @@
 html, body {
     margin: 0;
     padding: 0;
+    height: 100%; /* Ensure body takes full height for fixed positioning */
 }
 :root {
     --primary-color: #007bff;
@@ -26,7 +27,7 @@ body {
     background-color: var(--background-color);
     color: var(--text-color);
     margin: 0;
-    padding: var(--main-nav-height) 20px 20px 20px; /* Revert to using nav height for top padding */
+    padding: var(--main-nav-height) 20px 80px 20px; /* Add padding-bottom for fixed add task form */
     display: flex;
     flex-direction: column; /* Stack nav and containers vertically */
     align-items: center; /* Center them horizontally */
@@ -217,6 +218,48 @@ button[type="submit"]:hover {
     }
 }
 
+/* Fixed Add Task Form Container */
+#add-task-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%; /* Span full width */
+    background-color: #fff;
+    padding: 15px 20px; /* Padding inside the fixed box */
+    box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1); /* Shadow at the top */
+    z-index: 1000; /* Above main content, below FAB initially */
+    box-sizing: border-box; /* Include padding in width */
+    border-top: 1px solid #eee; /* Subtle border at the top */
+}
+
+/* Adjust form within the fixed container */
+#add-task-container #task-form {
+    margin-bottom: 0; /* Remove bottom margin from form */
+    max-width: 500px; /* Constrain form width to match container */
+    margin-left: auto; /* Center the form within the fixed container */
+    margin-right: auto;
+}
+
+/* Adjust h2 within the fixed container */
+#add-task-container h2 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.5rem; /* Slightly smaller for the fixed bar */
+}
+
+/* Media query for #task-form inside #add-task-container */
+@media (max-width: 520px) {
+    #add-task-container {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    #add-task-container #task-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    /* Input, select, button styles are already handled by general #task-form rules */
+}
+
 #dashboard-task-list,
 #browse-task-list {
     list-style: none;
@@ -337,4 +380,29 @@ button[type="submit"]:hover {
 
 #global-logout-btn:hover {
     background: var(--secondary-hover);
+}
+
+/* Floating Action Button (FAB) for adding tasks */
+.fab {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 2.5rem;
+    line-height: 60px; /* Vertically center the '+' */
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    z-index: 1001; /* Above other content but below potential modals */
+}
+
+.fab:hover {
+    background-color: var(--primary-hover);
+    transform: scale(1.05);
 }

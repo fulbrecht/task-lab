@@ -9,10 +9,10 @@
 </head>
 <body>
     <nav id="main-nav" style="display: none;">
-        <button id="global-refresh-btn" class="refresh-btn" title="Refresh">&#x21bb;</button>
         <span class="nav-title">Task Lab</span>
         <div class="nav-actions">
             <span id="username-display"></span>
+            <button id="global-refresh-btn" class="refresh-btn" title="Refresh">&#x21bb;</button>
             <button id="global-logout-btn">Logout</button>
         </div>
     </nav>
@@ -44,7 +44,17 @@
         <h1>Dashboard</h1>
         <p class="subtitle">Your top 3 highest-priority tasks. <a href="#" id="go-to-browse">Browse all &rarr;</a></p>
         <ul id="dashboard-task-list"></ul>
-        <hr>
+    </div>
+
+    <!-- New Browse All Tasks View -->
+    <div id="browse-container" class="container" style="display: none;">
+        <h1>All Tasks</h1>
+        <p class="subtitle"><a href="#" id="go-to-dashboard" class="header-link">&larr; Dashboard</a></p>
+        <ul id="browse-task-list"></ul>
+    </div>
+
+    <!-- Fixed Add Task Form Container -->
+    <div id="add-task-container" style="display: none;">
         <h2>Add a New Task</h2>
         <form id="task-form">
             <input type="text" id="task-input" placeholder="Add a new task..." required>
@@ -57,12 +67,7 @@
         </form>
     </div>
 
-    <!-- New Browse All Tasks View -->
-    <div id="browse-container" class="container" style="display: none;">
-        <h1>All Tasks</h1>
-        <p class="subtitle"><a href="#" id="go-to-dashboard" class="header-link">&larr; Dashboard</a></p>
-        <ul id="browse-task-list"></ul>
-    </div>
+    <button id="show-task-form-btn" class="fab" title="Add New Task" style="display: none;">+</button>
 
     <script src="/app.js" type="module"></script>
 </body>

@@ -1,6 +1,15 @@
 import * as api from './api.js';
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Register Service Worker
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js')
+                .then(registration => console.log('Service Worker registered:', registration))
+                .catch(error => console.error('Service Worker registration failed:', error));
+        });
+    }
+
     const authContainer = document.getElementById('auth-container');
     const appContainer = document.getElementById('app-container');
     const browseContainer = document.getElementById('browse-container');
@@ -23,6 +32,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const usernameDisplay = document.getElementById('username-display');
     const globalRefreshBtn = document.getElementById('global-refresh-btn');
     const globalLogoutBtn = document.getElementById('global-logout-btn');
+    // New add task elements
+    const addTaskContainer = document.getElementById('add-task-container');
+    const showTaskFormBtn = document.getElementById('show-task-form-btn');
 
     let currentUser = null;
 
@@ -34,6 +46,8 @@ document.addEventListener('DOMContentLoaded', () => {
         loginView.style.display = 'block';
         registerView.style.display = 'none';
         browseContainer.style.display = 'none';
+        addTaskContainer.style.display = 'none'; // Ensure fixed form is hidden
+        showTaskFormBtn.style.display = 'none'; // Hide FAB
         authError.textContent = '';
     };
 
@@ -44,24 +58,30 @@ document.addEventListener('DOMContentLoaded', () => {
         loginView.style.display = 'none';
         registerView.style.display = 'block';
         browseContainer.style.display = 'none';
+        addTaskContainer.style.display = 'none'; // Ensure fixed form is hidden
+        showTaskFormBtn.style.display = 'none'; // Hide FAB
         authError.textContent = '';
     };
 
     const showAppView = (username = null) => {
         mainNav.style.display = 'flex'; // Show nav when logged in
         if (username) usernameDisplay.textContent = `Hello, ${username}`;
+        showTaskFormBtn.style.display = 'block'; // Show FAB on dashboard
         authContainer.style.display = 'none';
         appContainer.style.display = 'block';
         browseContainer.style.display = 'none';
+        addTaskContainer.style.display = 'none'; // Ensure form is hidden on view switch
         loadDashboardTasks();
     };
 
     const showBrowseView = (username = null) => {
         mainNav.style.display = 'flex'; // Show nav when logged in
         if (username) usernameDisplay.textContent = `Hello, ${username}`;
+        showTaskFormBtn.style.display = 'none'; // Hide FAB on browse page
         authContainer.style.display = 'none';
         appContainer.style.display = 'none';
         browseContainer.style.display = 'block';
+        addTaskContainer.style.display = 'none'; // Ensure fixed form is hidden
         loadAllTasks();
     };
 
@@ -132,11 +152,22 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 await api.addTask(title, priority);
                 taskInput.value = '';
+                taskPriorityInput.value = '3'; // Reset priority to default
+                addTaskContainer.style.display = 'none'; // Hide form after successful submission
+                showTaskFormBtn.style.display = 'block'; // Show the FAB again
                 loadDashboardTasks();
             } catch (error) {
                 authError.textContent = `Error: ${error.message}`; // Use authError for general messages
             }
         }
+    });
+
+    showTaskFormBtn.addEventListener('click', () => {
+        // Toggle visibility of the fixed add task form
+        const isVisible = addTaskContainer.style.display === 'block';
+        addTaskContainer.style.display = isVisible ? 'none' : 'block';
+        showTaskFormBtn.style.display = isVisible ? 'block' : 'none'; // Toggle FAB visibility
+        if (!isVisible) taskInput.focus(); // Focus the input when the form appears
     });
 
     // --- Refresh Button Event Listeners ---
@@ -209,7 +240,8 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const tasks = await api.loadTasks();
             renderTasks(tasks, browseTaskList, true);
-        } catch (error) {
+        }
+        catch (error) {
             console.error('Error loading all tasks:', error);
         }
     }
