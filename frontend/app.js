@@ -365,21 +365,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const li = e.target.closest('li[data-id]');
         if (!li) return;
 
-        const id = li.dataset.id;
+        // Check if a specific control inside the task was clicked
+        if (e.target.closest('.task-controls')) {
+            if (e.target.matches('.delete-task-btn')) {
+                deleteTask(li.dataset.id);
+            } else if (e.target.matches('.edit-task-btn')) {
+                handleEditClick(e);
+            }
+            // If the click was on the select or padding of the controls, do nothing.
+            return;
+        }
 
-        // Handle delete button click
-        if (e.target.matches('.task-controls .delete-task-btn')) { // Target specific delete button
-            deleteTask(id);
-        } 
-        // Handle edit button click
-        else if (e.target.matches('.task-controls .edit-task-btn')) { // Target specific edit button
-            handleEditClick(e);
-        }
-        // Handle completion toggle (clicking on the title span)
-        else if (e.target.matches('.task-title') && e.target.tagName === 'SPAN') {
-            const isCompleted = li.classList.contains('completed');
-            toggleTaskCompletion(id, !isCompleted);
-        }
+        // If the click was anywhere else on the li, toggle completion.
+        const isCompleted = li.classList.contains('completed');
+        toggleTaskCompletion(li.dataset.id, !isCompleted);
     });
 
     // Separate listener for 'change' events on priority dropdowns

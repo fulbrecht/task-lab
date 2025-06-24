@@ -438,6 +438,7 @@ button[type="submit"]:hover {
     border-bottom: 1px solid #eee;
     transition: background-color 0.2s ease;
     word-break: break-all;
+    cursor: pointer; /* Make the entire list item clickable */
 }
 
 #dashboard-task-list li:hover,
@@ -451,7 +452,7 @@ button[type="submit"]:hover {
 }
 
 .task-title {
-    cursor: pointer;
+    /* cursor: pointer; */ /* No longer needed, moved to li */
 }
 
 #dashboard-task-list li.completed,
@@ -475,6 +476,7 @@ button[type="submit"]:hover {
     display: flex;
     align-items: center;
     margin-left: auto;
+    cursor: auto; /* Reset cursor for controls area */
     gap: 10px;
 }
 
