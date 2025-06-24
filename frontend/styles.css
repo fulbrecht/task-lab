@@ -437,7 +437,8 @@ button[type="submit"]:hover {
     padding: 15px 10px;
     border-bottom: 1px solid #eee;
     transition: background-color 0.2s ease;
-    word-break: break-all;
+    word-break: normal; /* Allow normal word wrapping */
+    overflow-wrap: break-word; /* Break long words if they don't fit */
     cursor: pointer; /* Make the entire list item clickable */
 }
 

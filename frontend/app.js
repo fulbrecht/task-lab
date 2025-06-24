@@ -406,12 +406,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function refreshCurrentView() {
-        // No refresh indicator to reset text for, just trigger the load
-        if (appContainer.style.display === 'block') {
-            await loadDashboardTasks();
-        } else if (browseContainer.style.display === 'block') {
-            await loadAllTasks();
-        }
+        // Perform a full page reload to ensure all assets are re-fetched
+        window.location.reload();
     }
 
     async function loadDashboardTasks() {

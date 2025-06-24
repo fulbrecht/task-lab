@@ -42,17 +42,21 @@ export async function logout() {
 }
 
 export async function checkAuthStatus() {
-    const res = await fetch(`${API_BASE_URL}/user`);
-    return handleResponse(res);
+    const res = await fetch(`${API_BASE_URL}/user`, { cache: 'no-store' }); // Always go to network
+    const data = await handleResponse(res);
+    if (!data || !data.user) {
+        throw new Error("Not authenticated"); // Explicitly throw if user is not found
+    }
+    return data;
 }
 
 export async function loadDashboardTasks() {
-    const res = await fetch(`${API_BASE_URL}/tasks/dashboard`);
+    const res = await fetch(`${API_BASE_URL}/tasks/dashboard`, { cache: 'no-store' });
     return handleResponse(res);
 }
 
 export async function loadTasks() {
-    const res = await fetch(`${API_BASE_URL}/tasks`);
+    const res = await fetch(`${API_BASE_URL}/tasks`, { cache: 'no-store' });
     return handleResponse(res);
 }
 
@@ -70,11 +74,20 @@ export async function deleteTask(id) {
     return handleResponse(res);
 }
 
-export async function updateTask(id, updates) {
+export async function toggleTaskCompletion(id, completed) {
     const res = await fetch(`${API_BASE_URL}/tasks/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updates),
+        body: JSON.stringify({ completed }),
+    });
+    return handleResponse(res);
+}
+
+export async function updateTaskPriority(id, priority) {
+    const res = await fetch(`${API_BASE_URL}/tasks/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ priority: parseInt(priority, 10) }),
     });
     return handleResponse(res);
 }
