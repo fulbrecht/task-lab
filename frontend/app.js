@@ -35,6 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // New add task elements
     const addTaskContainer = document.getElementById('add-task-container');
     const showTaskFormBtn = document.getElementById('show-task-form-btn');
+    const cancelAddTaskBtn = document.getElementById('cancel-add-task-btn');
 
     let currentUser = null;
 
@@ -144,6 +145,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Helper function to hide the add task form and show the FAB
+    const hideAddTaskFormAndShowFab = () => {
+        addTaskContainer.style.display = 'none';
+        showTaskFormBtn.style.display = 'block';
+        authError.textContent = ''; // Clear any error messages
+    };
+
     taskForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const title = taskInput.value.trim();
@@ -153,8 +161,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 await api.addTask(title, priority);
                 taskInput.value = '';
                 taskPriorityInput.value = '3'; // Reset priority to default
-                addTaskContainer.style.display = 'none'; // Hide form after successful submission
-                showTaskFormBtn.style.display = 'block'; // Show the FAB again
+                hideAddTaskFormAndShowFab(); // Use helper function
+                taskInput.focus(); // Keep focus on input for quick re-add
                 loadDashboardTasks();
             } catch (error) {
                 authError.textContent = `Error: ${error.message}`; // Use authError for general messages
@@ -168,7 +176,10 @@ document.addEventListener('DOMContentLoaded', () => {
         addTaskContainer.style.display = isVisible ? 'none' : 'block';
         showTaskFormBtn.style.display = isVisible ? 'block' : 'none'; // Toggle FAB visibility
         if (!isVisible) taskInput.focus(); // Focus the input when the form appears
+        authError.textContent = ''; // Clear any error messages when opening form
     });
+
+    cancelAddTaskBtn.addEventListener('click', hideAddTaskFormAndShowFab); // Hide form on cancel click
 
     // --- Refresh Button Event Listeners ---
     globalRefreshBtn.addEventListener('click', refreshCurrentView); // Use globalRefreshBtn
@@ -247,42 +258,46 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderTasks(tasks, listElement, showControls) {
-        listElement.innerHTML = '';
-        tasks.forEach(task => {
-            const li = document.createElement('li');
-            li.className = task.completed ? 'completed' : '';
-            li.dataset.id = task._id;
+        listElement.innerHTML = ''; // Clear the list
+        const fragment = document.createDocumentFragment(); // Create a fragment to hold new elements
+        tasks.forEach(task => fragment.appendChild(createTaskElement(task, showControls)));
+        listElement.appendChild(fragment); // Append all new elements at once
+    }
 
-            const priorityIndicator = document.createElement('div');
-            priorityIndicator.className = `priority-indicator priority-${task.priority}`;
-            li.appendChild(priorityIndicator);
+    function createTaskElement(task, showControls) {
+        const li = document.createElement('li');
+        li.className = task.completed ? 'completed' : '';
+        li.dataset.id = task._id;
 
-            const titleSpan = document.createElement('span');
-            titleSpan.className = 'task-title';
-            titleSpan.textContent = task.title;
-            li.appendChild(titleSpan);
+        const priorityIndicator = document.createElement('div');
+        priorityIndicator.className = `priority-indicator priority-${task.priority}`;
+        li.appendChild(priorityIndicator);
 
-            const controlsContainer = document.createElement('div');
-            controlsContainer.className = 'task-controls';
+        const titleSpan = document.createElement('span');
+        titleSpan.className = 'task-title';
+        titleSpan.textContent = task.title;
+        li.appendChild(titleSpan);
 
-            if (showControls) {
-                const prioritySelect = document.createElement('select');
-                prioritySelect.title = "Change task priority";
-                prioritySelect.innerHTML = `
-                    <option value="1" ${task.priority === 1 ? 'selected' : ''}>High</option>
-                    <option value="2" ${task.priority === 2 ? 'selected' : ''}>Medium</option>
-                    <option value="3" ${task.priority === 3 ? 'selected' : ''}>Low</option>
-                `;
-                controlsContainer.appendChild(prioritySelect);
-            }
+        const controlsContainer = document.createElement('div');
+        controlsContainer.className = 'task-controls';
 
-            const deleteBtn = document.createElement('button');
-            deleteBtn.textContent = 'Delete';
-            controlsContainer.appendChild(deleteBtn);
-            
-            li.appendChild(controlsContainer);
-            listElement.appendChild(li);
-        });
+        if (showControls) {
+            const prioritySelect = document.createElement('select');
+            prioritySelect.title = "Change task priority";
+            prioritySelect.innerHTML = `
+                <option value="1" ${task.priority === 1 ? 'selected' : ''}>High</option>
+                <option value="2" ${task.priority === 2 ? 'selected' : ''}>Medium</option>
+                <option value="3" ${task.priority === 3 ? 'selected' : ''}>Low</option>
+            `;
+            controlsContainer.appendChild(prioritySelect);
+        }
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = 'Delete';
+        controlsContainer.appendChild(deleteBtn);
+        
+        li.appendChild(controlsContainer);
+        return li;
     }
 
     async function deleteTask(id) {
