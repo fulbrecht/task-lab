@@ -93,12 +93,12 @@ h1 {
     background: none;
     border: none;
     cursor: pointer;
-    padding: 10px;
+    padding: 8px; /* Slightly reduce padding for a tighter fit */
     display: flex;
     flex-direction: column;
     justify-content: space-around;
-    width: 30px;
-    height: 30px;
+    width: 36px; /* Increase width for a larger clickable area */
+    height: 36px; /* Increase height for a larger clickable area */
     position: relative;
     z-index: 1001; /* Ensure it's clickable above other elements */
 }

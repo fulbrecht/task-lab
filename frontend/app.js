@@ -186,6 +186,18 @@ document.addEventListener('DOMContentLoaded', () => {
         authError.textContent = ''; // Clear any error messages when opening form
     });
 
+    // Close hamburger menu when clicking outside
+    document.addEventListener('click', (event) => {
+        // Check if the menu is open
+        if (mainMenu.classList.contains('open')) {
+            // Check if the click target is NOT the hamburger button AND NOT inside the menu itself
+            if (!hamburgerMenuBtn.contains(event.target) && !mainMenu.contains(event.target)) {
+                mainMenu.classList.remove('open');
+                hamburgerMenuBtn.classList.remove('open');
+            }
+        }
+    });
+
     hamburgerMenuBtn.addEventListener('click', () => {
         mainMenu.classList.toggle('open');
         hamburgerMenuBtn.classList.toggle('open'); // Animate hamburger icon
