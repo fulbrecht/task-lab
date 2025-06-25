@@ -2,8 +2,8 @@
 // You would need to add this library to your project, e.g., via a CDN link in index.html.
 importScripts('https://cdn.jsdelivr.net/npm/idb@7/build/umd.js');
 
-const STATIC_CACHE_NAME = 'tasklab-static-v3'; // Incremented version
-const DYNAMIC_CACHE_NAME = 'tasklab-dynamic-v3'; // Incremented version
+const STATIC_CACHE_NAME = 'tasklab-static-v4'; // Incremented version to force update
+const DYNAMIC_CACHE_NAME = 'tasklab-dynamic-v4'; // Incremented version to force update
 const urlsToCache = [
   '/', // The root HTML file
   '/index.html',
@@ -48,14 +48,39 @@ self.addEventListener('activate', (event) => {
 
 // Fetch event: Intercepts network requests
 self.addEventListener('fetch', event => {
-  // Strategy: Network falling back to Cache for API GET requests
-  if (event.request.url.includes('/api/') && event.request.method === 'GET') {
+  const requestUrl = new URL(event.request.url);
+
+  // 1. Handle API requests
+  if (requestUrl.pathname.startsWith('/api/')) {
+    // For API GET requests: Network First, then Cache
+    if (event.request.method === 'GET') {
+      event.respondWith(
+        fetch(event.request)
+          .then(networkResponse => {
+            // Cache successful network responses for future offline use
+            return caches.open(DYNAMIC_CACHE_NAME).then(cache => {
+              cache.put(event.request, networkResponse.clone());
+              return networkResponse;
+            });
+          })
+          .catch(() => {
+            // If network fails, try to get from cache
+            return caches.match(event.request);
+          })
+      );
+    } else {
+      // For API POST/PUT/DELETE requests: Network Only (offline handling in app.js)
+      event.respondWith(fetch(event.request));
+    }
+  }
+  // 2. Handle all other requests (static assets, HTML, etc.): Network First, then Cache
+  else {
     event.respondWith(
       fetch(event.request)
         .then(networkResponse => {
-          // If network request is successful, cache it and return it
-          return caches.open(DYNAMIC_CACHE_NAME).then(cache => {
-            cache.put(event.request.url, networkResponse.clone());
+          // Cache successful network responses for future offline use
+          return caches.open(STATIC_CACHE_NAME).then(cache => { // Use STATIC_CACHE_NAME for static assets
+            cache.put(event.request, networkResponse.clone());
             return networkResponse;
           });
         })
@@ -64,17 +89,7 @@ self.addEventListener('fetch', event => {
           return caches.match(event.request);
         })
     );
-  } 
-  // Strategy: Cache first, then network for static assets
-  else if (urlsToCache.some(url => event.request.url.endsWith(url) || event.request.url === self.location.origin + '/')) {
-    event.respondWith(
-      caches.match(event.request).then(response => {
-        return response || fetch(event.request);
-      })
-    );
   }
-  // For other requests (like POST/PUT/DELETE to API), just go to network.
-  // Offline handling is managed in app.js with Background Sync.
 });
 
 
