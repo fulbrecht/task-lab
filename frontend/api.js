@@ -42,7 +42,7 @@ export async function logout() {
 }
 
 export async function checkAuthStatus() {
-    const res = await fetch(`${API_BASE_URL}/user`, { cache: 'no-store' }); // Always go to network
+    const res = await fetch(`${API_BASE_URL}/user`); // Allow service worker to cache
     const data = await handleResponse(res);
     if (!data || !data.user) {
         throw new Error("Not authenticated"); // Explicitly throw if user is not found

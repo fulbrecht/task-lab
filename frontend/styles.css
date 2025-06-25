@@ -612,3 +612,19 @@ button[type="submit"]:hover {
     background-color: var(--primary-hover);
     transform: scale(1.05);
 }
+
+.toast {
+    position: fixed;
+    bottom: -100px; /* Initially hidden */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #333;
+    color: white;
+    padding: 16px;
+    border-radius: 8px;
+    transition: bottom 0.5s ease;
+    z-index: 2000;
+}
+.toast.show {
+    bottom: 30px; /* Slide into view */
+}

@@ -8,6 +8,8 @@
     <link rel="manifest" href="/manifest.json">
 </head>
 <body>
+    <div id="toast-notification" class="toast"></div>
+
     <nav id="main-nav" style="display: none;">
         <span class="nav-title">Task Lab</span>
         <div class="nav-actions">
@@ -25,8 +27,7 @@
         <a href="#" id="go-to-browse" class="menu-item">Browse All Tasks</a>
         <button id="global-refresh-btn" class="menu-item refresh-btn" title="Refresh">&#x21bb; Refresh</button>
         <button id="global-logout-btn" class="menu-item">Logout</button>
-        </div>
-    </nav>
+    </div>
     <div id="auth-container" class="container">
         <h1>Task Lab</h1>
         <div id="login-view">
@@ -90,6 +91,9 @@
     </div>
 
     <button id="show-task-form-btn" class="fab" title="Add New Task">+</button>
+
+    <!-- IndexedDB Library for offline support -->
+    <script src="https://cdn.jsdelivr.net/npm/idb@7/build/umd.js"></script>
 
     <script src="/app.js" type="module"></script>
 </body>
