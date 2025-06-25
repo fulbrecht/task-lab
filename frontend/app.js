@@ -34,6 +34,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const hamburgerMenuBtn = document.getElementById('hamburger-menu-btn');
     const mainMenu = document.getElementById('main-menu');
     // New add task elements
+    const settingsContainer = document.getElementById('settings-container');
+    const goToSettingsLink = document.getElementById('go-to-settings');
+    const settingsForm = document.getElementById('settings-form');
+    const dashboardTaskCountInput = document.getElementById('dashboard-task-count');
     const authError = document.getElementById('auth-error'); // Moved for better scope
     const addTaskContainer = document.getElementById('add-task-container');
     const showTaskFormBtn = document.getElementById('show-task-form-btn');
@@ -49,6 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loginView.style.display = 'block';
         registerView.style.display = 'none';
         browseContainer.style.display = 'none';
+        settingsContainer.style.display = 'none';
         mainMenu.classList.remove('open'); // Ensure menu is closed
         addTaskContainer.style.display = 'none'; // Ensure fixed form is hidden
         showTaskFormBtn.style.display = 'none'; // Hide FAB
@@ -62,6 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loginView.style.display = 'none';
         registerView.style.display = 'block';
         browseContainer.style.display = 'none';
+        settingsContainer.style.display = 'none';
         mainMenu.classList.remove('open'); // Ensure menu is closed
         addTaskContainer.style.display = 'none'; // Ensure fixed form is hidden
         showTaskFormBtn.style.display = 'none'; // Hide FAB
@@ -77,6 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
         authContainer.style.display = 'none';
         appContainer.style.display = 'block';
         browseContainer.style.display = 'none';
+        settingsContainer.style.display = 'none';
         addTaskContainer.style.display = 'none'; // Ensure form is hidden on view switch
         loadDashboardTasks();
     };
@@ -90,8 +97,24 @@ document.addEventListener('DOMContentLoaded', () => {
         authContainer.style.display = 'none';
         appContainer.style.display = 'none';
         browseContainer.style.display = 'block';
+        settingsContainer.style.display = 'none';
         addTaskContainer.style.display = 'none'; // Ensure fixed form is hidden
         loadAllTasks();
+    };
+
+    const showSettingsView = (username = null) => {
+        mainNav.style.display = 'flex';
+        if (username) usernameDisplay.textContent = `Hello, ${username}`;
+        mainMenu.classList.remove('open');
+        hamburgerMenuBtn.classList.remove('open');
+        showTaskFormBtn.style.display = 'none';
+        authContainer.style.display = 'none';
+        appContainer.style.display = 'none';
+        browseContainer.style.display = 'none';
+        addTaskContainer.style.display = 'none';
+        settingsContainer.style.display = 'block';
+        const savedCount = localStorage.getItem('dashboardTaskCount') || 3;
+        dashboardTaskCountInput.value = savedCount;
     };
 
     // --- Event Listeners ---
@@ -113,6 +136,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     goToDashboardLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        showAppView(currentUser);
+    });
+
+    goToSettingsLink.addEventListener('click', (e) => {
         e.preventDefault();
         showAppView(currentUser);
     });
@@ -187,6 +215,14 @@ document.addEventListener('DOMContentLoaded', () => {
         showTaskFormBtn.style.display = isVisible ? 'block' : 'none'; // Toggle FAB visibility
         if (!isVisible) taskInput.focus(); // Focus the input when the form appears
         authError.textContent = ''; // Clear any error messages when opening form
+    });
+
+    settingsForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const newCount = dashboardTaskCountInput.value;
+        localStorage.setItem('dashboardTaskCount', newCount);
+        alert('Settings saved!');
+        showAppView(currentUser);
     });
 
     // New function to handle clicking on the edit pencil icon
@@ -406,13 +442,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function refreshCurrentView() {
-        // Perform a full page reload to ensure all assets are re-fetched
-        window.location.reload();
+        // Perform a full page reload, bypassing the cache
+        window.location.reload(true);
     }
 
     async function loadDashboardTasks() {
         try {
-            const tasks = await api.loadDashboardTasks();
+            const limit = localStorage.getItem('dashboardTaskCount') || 3;
+            const tasks = await api.loadDashboardTasks(limit);
             renderTasks(tasks, dashboardTaskList, false);
         } catch (error) {
             console.error('Error loading tasks:', error);

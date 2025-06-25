@@ -14,9 +14,16 @@ router.use((req, res, next) => {
 // GET top 3 priority tasks for the dashboard (uncompleted only)
 router.get('/dashboard', async (req, res, next) => {
   try {
+    // Get limit from query, default to 3, and parse as integer.
+    let limit = parseInt(req.query.limit, 10) || 3;
+    // Add some validation to prevent excessively large requests.
+    if (limit < 1 || limit > 10) {
+        limit = 3;
+    }
+
     const tasks = await Task.find({ user: req.user._id, completed: false })
       .sort({ priority: 1, createdAt: 1 }) // Sort by priority (1=High), then age (oldest first)
-      .limit(3);
+      .limit(limit);
     res.json(tasks);
   } catch (error) {
     next(error);

@@ -50,8 +50,8 @@ export async function checkAuthStatus() {
     return data;
 }
 
-export async function loadDashboardTasks() {
-    const res = await fetch(`${API_BASE_URL}/tasks/dashboard`, { cache: 'no-store' });
+export async function loadDashboardTasks(limit = 3) {
+    const res = await fetch(`${API_BASE_URL}/tasks/dashboard?limit=${limit}`, { cache: 'no-store' });
     return handleResponse(res);
 }
 
