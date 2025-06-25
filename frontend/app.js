@@ -142,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     goToSettingsLink.addEventListener('click', (e) => {
         e.preventDefault();
-        showAppView(currentUser);
+        showSettingsView(currentUser); // Corrected to call the settings view
     });
 
     loginForm.addEventListener('submit', async (e) => {
@@ -549,7 +549,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            await api.updateTask(id, { completed });
+            await api.updateTask(id, { completed }); // Now calls the general updateTask
             // Refresh dashboard as completed tasks are removed from it
             loadDashboardTasks();
         } catch (error) {
@@ -561,7 +561,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function updateTaskPriority(id, priority) {
         try {
-            await api.updateTask(id, { priority: parseInt(priority, 10) });
+            await api.updateTask(id, { priority: parseInt(priority, 10) }); // Now calls the general updateTask
             loadDashboardTasks();
             loadAllTasks();
         } catch (error) {

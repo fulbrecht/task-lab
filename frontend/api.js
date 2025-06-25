@@ -74,20 +74,11 @@ export async function deleteTask(id) {
     return handleResponse(res);
 }
 
-export async function toggleTaskCompletion(id, completed) {
+export async function updateTask(id, updates) {
     const res = await fetch(`${API_BASE_URL}/tasks/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ completed }),
-    });
-    return handleResponse(res);
-}
-
-export async function updateTaskPriority(id, priority) {
-    const res = await fetch(`${API_BASE_URL}/tasks/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ priority: parseInt(priority, 10) }),
+        body: JSON.stringify(updates),
     });
     return handleResponse(res);
 }
