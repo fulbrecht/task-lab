@@ -73,6 +73,7 @@
             <input type="number" id="dashboard-task-count" min="1" max="10" value="3">
             <button type="submit">Save Settings</button>
         </form>
+        <button id="enable-notifications-btn" type="button" class="btn" style="margin-top: 1rem;">Enable Notifications</button>
     </div>
 
     <!-- Fixed Add Task Form Container -->
@@ -86,6 +87,7 @@
                 <option value="3" selected>Low</option>
             </select>
             <input type="datetime-local" id="task-priority-schedule" title="Schedule priority change">
+            <input type="datetime-local" id="task-notification-date" title="Set notification date">
             <button type="submit">Add Task</button>
             <button type="button" id="cancel-add-task-btn">Cancel</button>
         </form>

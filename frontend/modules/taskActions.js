@@ -8,6 +8,7 @@ export async function loadDashboardTasks() {
         const limit = localStorage.getItem('dashboardTaskCount') || 3;
         const tasks = await api.loadDashboardTasks(limit);
         renderTasks(tasks, elements.dashboardTaskList, false);
+        scheduleNotifications(tasks);
     } catch (error) {
         console.error('Error loading tasks:', error);
         throw error; // Re-throw for the main app to handle view changes
@@ -18,6 +19,7 @@ export async function loadAllTasks() {
     try {
         const tasks = await api.loadTasks();
         renderTasks(tasks, elements.browseTaskList, true);
+        scheduleNotifications(tasks);
     } catch (error) {
         console.error('Error loading all tasks:', error);
     }
@@ -32,6 +34,25 @@ export async function checkScheduledTasks() {
         }
     } catch (error) {
         console.error('Error checking scheduled tasks:', error);
+    }
+}
+
+export async function scheduleNotifications(tasks) {
+    if (Notification.permission === 'granted') {
+        tasks.forEach(task => {
+            if (task.notificationDate) {
+                const notificationTime = new Date(task.notificationDate).getTime();
+                const now = new Date().getTime();
+                if (notificationTime > now) {
+                    const delay = notificationTime - now;
+                    setTimeout(() => {
+                        new Notification('Task Reminder', {
+                            body: task.title,
+                        });
+                    }, delay);
+                }
+            }
+        });
     }
 }
 
@@ -134,13 +155,15 @@ export async function handleAddTask(e) {
     const title = elements.taskInput.value.trim();
     const priority = elements.taskPriorityInput.value;
     const prioritySchedule = elements.taskPriorityScheduleInput.value;
+    const notificationDate = elements.taskNotificationDateInput.value;
 
     if (title) {
         try {
-            await api.addTask(title, priority, prioritySchedule);
+            await api.addTask(title, priority, prioritySchedule, notificationDate);
             elements.taskInput.value = '';
             elements.taskPriorityInput.value = '3';
             elements.taskPriorityScheduleInput.value = '';
+            elements.taskNotificationDateInput.value = '';
             hideAddTaskFormAndShowFab();
             elements.taskInput.focus();
             loadDashboardTasks();
@@ -149,7 +172,7 @@ export async function handleAddTask(e) {
             if ('serviceWorker' in navigator && 'SyncManager' in window) {
                 try {
                     const db = await idb.openDB('tasklab-db', 1);
-                    await db.add('sync-tasks', { title, priority, prioritySchedule });
+                    await db.add('sync-tasks', { title, priority, prioritySchedule, notificationDate });
                     const registration = await navigator.serviceWorker.ready;
                     await registration.sync.register('sync-new-task');
                     showToast('You are offline. Task saved for syncing.');

@@ -1,7 +1,8 @@
-import * as api from './api.js';
-import * as state from './modules/state.js';
-import * as ui from './modules/ui.js';
-import * as taskActions from './modules/taskActions.js';
+import * as api from '/api.js';
+import * as state from '/modules/state.js';
+import * as ui from '/modules/ui.js';
+import * as taskActions from '/modules/taskActions.js';
+import { initializePushNotifications } from '/pushNotifications.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     // Register Service Worker
@@ -125,6 +126,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Settings
         ui.elements.settingsForm.addEventListener('submit', handleSaveSettings);
+        if (ui.elements.enableNotificationsBtn) {
+            ui.elements.enableNotificationsBtn.addEventListener('click', () => {
+                initializePushNotifications();
+                ui.elements.enableNotificationsBtn.textContent = 'Notifications Enabled';
+                ui.elements.enableNotificationsBtn.disabled = true;
+            });
+        }
 
         // Global
         ui.elements.globalRefreshBtn.addEventListener('click', () => window.location.reload(true));

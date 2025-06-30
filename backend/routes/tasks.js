@@ -65,6 +65,7 @@ router.post('/', async (req, res, next) => {
     title: req.body.title,
     priority: req.body.priority,
     prioritySchedule: req.body.prioritySchedule,
+    notificationDate: req.body.notificationDate,
     user: req.user._id,
   });
 

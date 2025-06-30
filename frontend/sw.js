@@ -10,11 +10,12 @@ const urlsToCache = [
   '/styles.css',
   '/api.js',
   '/app.js',
-  // Add the new modules to the cache
+  // Module files (using root-relative paths)
   '/modules/state.js',
   '/modules/ui.js',
   '/modules/taskActions.js',
   '/modules/taskRenderer.js',
+  '/pushNotifications.js',
   // Also cache the idb library itself for full offline functionality
   'https://cdn.jsdelivr.net/npm/idb@7/build/umd.js'
 ];
@@ -73,21 +74,19 @@ self.addEventListener('fetch', event => {
       event.respondWith(fetch(event.request));
     }
   }
-  // 2. Handle all other requests (static assets, HTML, etc.): Network First, then Cache
+  // 2. Handle all other requests (static assets, HTML, etc.): Cache First, then Network
   else {
     event.respondWith(
-      fetch(event.request)
-        .then(networkResponse => {
-          // Cache successful network responses for future offline use
-          return caches.open(STATIC_CACHE_NAME).then(cache => { // Use STATIC_CACHE_NAME for static assets
+      caches.match(event.request).then(cachedResponse => {
+        // Return from cache if found, otherwise fetch from network
+        return cachedResponse || fetch(event.request).then(networkResponse => {
+          // And cache the new response for next time
+          return caches.open(STATIC_CACHE_NAME).then(cache => {
             cache.put(event.request, networkResponse.clone());
             return networkResponse;
           });
-        })
-        .catch(() => {
-          // If network fails, try to get from cache
-          return caches.match(event.request);
-        })
+        });
+      })
     );
   }
 });
@@ -129,3 +128,35 @@ async function syncNewTasks() {
     }
   }
 }
+
+// --- Push Notification Event Listeners ---
+
+/**
+ * Listen for push events from the server.
+ */
+self.addEventListener('push', event => {
+    console.log('[Service Worker] Push Received.');
+    const data = event.data.json();
+    console.log('[Service Worker] Push data: ', data);
+
+    const title = data.title || 'Task Lab';
+    const options = {
+        body: data.body || 'You have a new notification.',
+        icon: '/icons/icon-192x192.png', // Ensure you have an icon here
+        badge: '/icons/icon-96x96.png', // And a smaller badge icon
+        data: {
+            url: data.url || '/' // URL to open when notification is clicked
+        }
+    };
+
+    event.waitUntil(self.registration.showNotification(title, options));
+});
+
+/**
+ * Listen for clicks on notifications.
+ */
+self.addEventListener('notificationclick', event => {
+    console.log('[Service Worker] Notification click Received.');
+    event.notification.close();
+    event.waitUntil(clients.openWindow(event.notification.data.url));
+});

@@ -18,6 +18,7 @@ export const elements = {
     taskInput: document.getElementById('task-input'),
     taskPriorityInput: document.getElementById('task-priority'),
     taskPriorityScheduleInput: document.getElementById('task-priority-schedule'),
+    taskNotificationDateInput: document.getElementById('task-notification-date'),
     authError: document.getElementById('auth-error'),
     toast: document.getElementById('toast-notification'),
     loginForm: document.getElementById('login-form'),
@@ -32,6 +33,7 @@ export const elements = {
     globalLogoutBtn: document.getElementById('global-logout-btn'),
     globalRefreshBtn: document.getElementById('global-refresh-btn'),
     cancelAddTaskBtn: document.getElementById('cancel-add-task-btn'),
+    enableNotificationsBtn: document.getElementById('enable-notifications-btn'),
 };
 
 // --- UI Toggling ---

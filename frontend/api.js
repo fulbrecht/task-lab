@@ -60,11 +60,11 @@ export async function loadTasks() {
     return handleResponse(res);
 }
 
-export async function addTask(title, priority, prioritySchedule) {
+export async function addTask(title, priority, prioritySchedule, notificationDate) {
     const res = await fetch(`${API_BASE_URL}/tasks`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, priority, prioritySchedule }),
+        body: JSON.stringify({ title, priority, prioritySchedule, notificationDate }),
     });
     return handleResponse(res);
 }
