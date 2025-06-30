@@ -153,6 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
             state.setCurrentUser(data.user.username);
             ui.showAppView(state.getCurrentUser());
             taskActions.loadDashboardTasks();
+            setInterval(taskActions.checkScheduledTasks, 60000); // Check every minute
         } catch (error) {
             ui.showLoginView();
         }

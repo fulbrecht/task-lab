@@ -23,6 +23,18 @@ export async function loadAllTasks() {
     }
 }
 
+export async function checkScheduledTasks() {
+    try {
+        if (elements.appContainer.style.display === 'block') {
+            await loadDashboardTasks();
+        } else if (elements.browseContainer.style.display === 'block') {
+            await loadAllTasks();
+        }
+    } catch (error) {
+        console.error('Error checking scheduled tasks:', error);
+    }
+}
+
 // --- Task Actions ---
 export async function deleteTask(id) {
     if (!confirm('Are you sure you want to delete this task?')) {
@@ -121,11 +133,14 @@ export async function handleAddTask(e) {
     e.preventDefault();
     const title = elements.taskInput.value.trim();
     const priority = elements.taskPriorityInput.value;
+    const prioritySchedule = elements.taskPriorityScheduleInput.value;
+
     if (title) {
         try {
-            await api.addTask(title, priority);
+            await api.addTask(title, priority, prioritySchedule);
             elements.taskInput.value = '';
             elements.taskPriorityInput.value = '3';
+            elements.taskPriorityScheduleInput.value = '';
             hideAddTaskFormAndShowFab();
             elements.taskInput.focus();
             loadDashboardTasks();
@@ -134,7 +149,7 @@ export async function handleAddTask(e) {
             if ('serviceWorker' in navigator && 'SyncManager' in window) {
                 try {
                     const db = await idb.openDB('tasklab-db', 1);
-                    await db.add('sync-tasks', { title, priority });
+                    await db.add('sync-tasks', { title, priority, prioritySchedule });
                     const registration = await navigator.serviceWorker.ready;
                     await registration.sync.register('sync-new-task');
                     showToast('You are offline. Task saved for syncing.');

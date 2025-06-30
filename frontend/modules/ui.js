@@ -17,6 +17,7 @@ export const elements = {
     dashboardTaskCountInput: document.getElementById('dashboard-task-count'),
     taskInput: document.getElementById('task-input'),
     taskPriorityInput: document.getElementById('task-priority'),
+    taskPriorityScheduleInput: document.getElementById('task-priority-schedule'),
     authError: document.getElementById('auth-error'),
     toast: document.getElementById('toast-notification'),
     loginForm: document.getElementById('login-form'),

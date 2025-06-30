@@ -24,6 +24,15 @@ router.get('/dashboard', async (req, res, next) => {
     const tasks = await Task.find({ user: req.user._id, completed: false })
       .sort({ priority: 1, createdAt: 1 }) // Sort by priority (1=High), then age (oldest first)
       .limit(limit);
+    
+    // Automatically update task priority based on prioritySchedule
+    for (const task of tasks) {
+      if (task.prioritySchedule && new Date() > new Date(task.prioritySchedule) && task.priority !== 1) {
+        task.priority = 1;
+        await task.save();
+      }
+    }
+    
     res.json(tasks);
   } catch (error) {
     next(error);
@@ -35,6 +44,15 @@ router.get('/', async (req, res, next) => {
   try {
      // Sort by creation date for a predictable order on the browse page
     const tasks = await Task.find({ user: req.user._id }).sort({ createdAt: -1 });
+
+    // Automatically update task priority based on prioritySchedule
+    for (const task of tasks) {
+      if (task.prioritySchedule && new Date() > new Date(task.prioritySchedule) && task.priority !== 1) {
+        task.priority = 1;
+        await task.save();
+      }
+    }
+
     res.json(tasks);
   } catch (error) {
     next(error);
@@ -46,6 +64,7 @@ router.post('/', async (req, res, next) => {
   const task = new Task({
     title: req.body.title,
     priority: req.body.priority,
+    prioritySchedule: req.body.prioritySchedule,
     user: req.user._id,
   });
 
