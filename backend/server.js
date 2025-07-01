@@ -11,12 +11,12 @@ require('dotenv').config();
 const User = require('./models/user'); // Import the User model
 const authRoutes = require('./routes/auth');
 const taskRoutes = require('./routes/tasks');
+const notificationRoutes = require('./routes/notifications').router;
 
 const app = express();
 const port = process.env.PORT || 3001;
 
 // --- Push Notification Setup ---
-// This needs to be configured before the routes that use it are defined.
 const vapidKeys = {
     publicKey: process.env.VAPID_PUBLIC_KEY,
     privateKey: process.env.VAPID_PRIVATE_KEY,
@@ -31,9 +31,6 @@ if (!vapidKeys.publicKey || !vapidKeys.privateKey) {
         vapidKeys.privateKey
     );
 }
-
-// In a production app, you should store subscriptions in a database.
-let subscriptions = [];
 
 // --- Middleware ---
 app.use(express.json());
@@ -91,30 +88,7 @@ passport.deserializeUser(async (id, done) => {
 // --- API Routes ---
 app.use('/api', authRoutes);
 app.use('/api/tasks', taskRoutes);
-// Route to provide the VAPID public key to the client
-app.get('/api/vapidPublicKey', (req, res) => {
-    if (!vapidKeys.publicKey) {
-        return res.status(500).send('VAPID public key not configured on the server.');
-    }
-    res.send(vapidKeys.publicKey);
-});
-
-// New route to handle push subscription
-app.post('/api/subscribe', (req, res) => {
-    const subscription = req.body;
-    // TODO: Associate subscription with the logged-in user and save to DB
-    console.log('Received subscription:', subscription);
-    subscriptions.push(subscription);
-
-    // Send a welcome notification for immediate feedback
-    const payload = JSON.stringify({
-        title: 'Task Lab Notifications Enabled!',
-        body: 'You will now receive reminders for your tasks.',
-    });
-    webpush.sendNotification(subscription, payload).catch(err => console.error(err));
-
-    res.status(201).json({ message: 'Subscription successful.' });
-});
+app.use('/api/notifications', notificationRoutes);
 
 // --- Serve Frontend (Catch-all) ---
 // This must come AFTER all API routes

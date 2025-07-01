@@ -1,5 +1,6 @@
 const express = require('express');
 const Task = require('../models/task');
+const { sendTaskNotifications } = require('./notifications');
 
 const router = express.Router();
 
@@ -10,6 +11,40 @@ router.use((req, res, next) => {
   }
   res.status(401).json({ message: 'Unauthorized' });
 });
+
+// A function to apply priority updates based on schedules for all of a user's tasks.
+// This is more efficient as it uses a single DB query.
+const updateScheduledPriorities = async (userId) => {
+    try {
+      const now = new Date();
+      // Update all tasks for the user where the schedule has passed and priority isn't already high.
+      await Task.updateMany(
+        {
+          user: userId,
+          prioritySchedule: { $exists: true, $ne: null, $lte: now },
+          priority: { $ne: 1 },
+          completed: false, // Only update uncompleted tasks
+        },
+        { $set: { priority: 1 } }
+      );
+    } catch (error) {
+      // Log the error but don't block the main request flow.
+      console.error('Error updating scheduled task priorities:', error);
+    }
+  };
+
+// Middleware to update priorities and send notifications before fetching tasks
+const applyUpdates = async (req, res, next) => {
+    if (req.user && req.user._id) {
+      await updateScheduledPriorities(req.user._id);
+      await sendTaskNotifications(req.user._id);
+    }
+    next();
+  };
+
+// Apply the priority update middleware to the routes that list tasks.
+router.use(['/', '/dashboard'], applyUpdates);
+
 
 // GET top 3 priority tasks for the dashboard (uncompleted only)
 router.get('/dashboard', async (req, res, next) => {
@@ -25,14 +60,6 @@ router.get('/dashboard', async (req, res, next) => {
       .sort({ priority: 1, createdAt: 1 }) // Sort by priority (1=High), then age (oldest first)
       .limit(limit);
     
-    // Automatically update task priority based on prioritySchedule
-    for (const task of tasks) {
-      if (task.prioritySchedule && new Date() > new Date(task.prioritySchedule) && task.priority !== 1) {
-        task.priority = 1;
-        await task.save();
-      }
-    }
-    
     res.json(tasks);
   } catch (error) {
     next(error);
@@ -44,14 +71,6 @@ router.get('/', async (req, res, next) => {
   try {
      // Sort by creation date for a predictable order on the browse page
     const tasks = await Task.find({ user: req.user._id }).sort({ createdAt: -1 });
-
-    // Automatically update task priority based on prioritySchedule
-    for (const task of tasks) {
-      if (task.prioritySchedule && new Date() > new Date(task.prioritySchedule) && task.priority !== 1) {
-        task.priority = 1;
-        await task.save();
-      }
-    }
 
     res.json(tasks);
   } catch (error) {
@@ -80,11 +99,16 @@ router.post('/', async (req, res, next) => {
 // PUT (update) a task
 router.put('/:id', async (req, res, next) => {
   try {
-    const { title, completed, priority } = req.body;
+    const { title, completed, priority, prioritySchedule, notificationDate } = req.body;
     const updates = {};
     if (title != null) updates.title = title;
     if (completed != null) updates.completed = completed;
     if (priority != null) updates.priority = priority;
+    if (prioritySchedule != null) updates.prioritySchedule = prioritySchedule;
+    if (notificationDate != null) {
+        updates.notificationDate = notificationDate;
+        updates.notificationSent = false; // Reset notification status
+    }
 
     const updatedTask = await Task.findOneAndUpdate(
       { _id: req.params.id, user: req.user._id },

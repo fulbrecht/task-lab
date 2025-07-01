@@ -44,9 +44,9 @@ async function subscribeUserToPush() {
         });
 
         // Send the new subscription to your backend.
-        await fetch('/api/subscribe', {
+        await fetch('/api/notifications/subscribe', {
             method: 'POST',
-            body: JSON.stringify(newSubscription),
+            body: JSON.stringify({ subscription: newSubscription }),
             headers: { 'Content-Type': 'application/json' }
         });
         console.log('User subscribed successfully and subscription sent to server.');

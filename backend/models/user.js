@@ -13,6 +13,10 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  subscriptions: {
+    type: [mongoose.Schema.Types.Mixed],
+    default: []
+  }
 });
 
 // Hash the password before saving the user model

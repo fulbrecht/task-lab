@@ -5,10 +5,6 @@ function createTaskElement(task, showControls, isDashboardView) {
     li.className = task.completed ? 'completed' : '';
     li.dataset.id = task._id;
 
-    if (task.prioritySchedule && new Date() > new Date(task.prioritySchedule) && task.priority === 1) {
-        li.classList.add('priority-updated');
-    }
-
     const priorityIndicator = document.createElement('div');
     priorityIndicator.className = `priority-indicator priority-${task.priority}`;
     li.appendChild(priorityIndicator);

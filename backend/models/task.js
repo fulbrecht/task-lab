@@ -54,6 +54,10 @@ const taskSchema = new mongoose.Schema({
         type: Date,
         default: null
     },
+    notificationSent: {
+        type: Boolean,
+        default: false
+    },
 }, { timestamps: true }); // Add timestamps to track creation date
 
 // This pre-save hook automatically manages the completedTimestamp

@@ -16,18 +16,7 @@ html, body {
     --high-priority: #e57373;
 }
 
-@keyframes highlight {
-    0% {
-        background-color: yellow;
-    }
-    100% {
-        background-color: transparent;
-    }
-}
 
-.priority-updated {
-    animation: highlight 1s ease-in-out;
-}
 
 /* Universal Box-Sizing for predictable layouts */
 *, *::before, *::after {
