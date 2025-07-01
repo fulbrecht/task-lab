@@ -1,17 +1,16 @@
 import { elements } from './ui.js';
 
-function createTaskElement(task, showControls, isDashboardView) {
+function createTaskElement(task, showControls) {
     const li = document.createElement('li');
-    li.className = task.completed ? 'completed' : '';
+    li.className = `priority-${task.priority}`;
+    if (task.completed) {
+        li.classList.add('completed');
+    }
     li.dataset.id = task._id;
 
     const priorityIndicator = document.createElement('div');
     priorityIndicator.className = `priority-indicator priority-${task.priority}`;
     li.appendChild(priorityIndicator);
-
-    if (isDashboardView) {
-        li.classList.add(`priority-size-${task.priority}`);
-    }
 
     const titleSpan = document.createElement('span');
     titleSpan.className = 'task-title';
@@ -49,7 +48,6 @@ function createTaskElement(task, showControls, isDashboardView) {
 export function renderTasks(tasks, listElement, showControls) {
     listElement.innerHTML = '';
     const fragment = document.createDocumentFragment();
-    const isDashboardView = (listElement === elements.dashboardTaskList);
-    tasks.forEach(task => fragment.appendChild(createTaskElement(task, showControls, isDashboardView)));
+    tasks.forEach(task => fragment.appendChild(createTaskElement(task, showControls)));
     listElement.appendChild(fragment);
 }

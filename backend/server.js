@@ -12,6 +12,7 @@ const User = require('./models/user'); // Import the User model
 const authRoutes = require('./routes/auth');
 const taskRoutes = require('./routes/tasks');
 const notificationRoutes = require('./routes/notifications').router;
+require('./scheduler'); // Start the scheduler
 
 const app = express();
 const port = process.env.PORT || 3001;

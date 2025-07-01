@@ -34,16 +34,7 @@ const updateScheduledPriorities = async (userId) => {
   };
 
 // Middleware to update priorities and send notifications before fetching tasks
-const applyUpdates = async (req, res, next) => {
-    if (req.user && req.user._id) {
-      await updateScheduledPriorities(req.user._id);
-      await sendTaskNotifications(req.user._id);
-    }
-    next();
-  };
 
-// Apply the priority update middleware to the routes that list tasks.
-router.use(['/', '/dashboard'], applyUpdates);
 
 
 // GET top 3 priority tasks for the dashboard (uncompleted only)

@@ -55,19 +55,20 @@
     <div id="app-container" class="container" style="display: none;">
         <h1>Dashboard</h1>
         <p class="subtitle">Your top 3 highest-priority tasks.</p>
-        <ul id="dashboard-task-list"></ul>
+        <ul id="dashboard-task-list" class="task-list"></ul>
     </div>
 
     <!-- New Browse All Tasks View -->
     <div id="browse-container" class="container" style="display: none;">
         <h1>All Tasks</h1>
-        <p class="subtitle"><a href="#" id="go-to-dashboard" class="header-link">&larr; Dashboard</a></p>
-        <ul id="browse-task-list"></ul>
+        <p class="subtitle"><a href="#" id="go-to-dashboard-from-browse" class="header-link">&larr; Dashboard</a></p>
+        <ul id="browse-task-list" class="task-list"></ul>
     </div>
 
     <!-- New Settings View -->
     <div id="settings-container" class="container" style="display: none;">
         <h1>Settings</h1>
+        <p class="subtitle"><a href="#" id="go-to-dashboard-from-settings" class="header-link">&larr; Dashboard</a></p>
         <form id="settings-form">
             <label for="dashboard-task-count">Tasks on Dashboard</label>
             <input type="number" id="dashboard-task-count" min="1" max="10" value="3">
@@ -86,7 +87,9 @@
                 <option value="2">Medium</option>
                 <option value="3" selected>Low</option>
             </select>
+            <label for="task-priority-schedule">Priority Schedule:</label>
             <input type="datetime-local" id="task-priority-schedule" title="Schedule priority change">
+            <label for="task-notification-date">Notification Date:</label>
             <input type="datetime-local" id="task-notification-date" title="Set notification date">
             <button type="submit">Add Task</button>
             <button type="button" id="cancel-add-task-btn">Cancel</button>

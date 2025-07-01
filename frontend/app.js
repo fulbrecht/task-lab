@@ -90,28 +90,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Setup All Event Listeners ---
     function initializeEventListeners() {
+        // View Switching
+        document.body.addEventListener('click', (e) => {
+            if (e.target.matches('#show-register')) {
+                e.preventDefault();
+                ui.showRegisterView();
+            } else if (e.target.matches('#show-login')) {
+                e.preventDefault();
+                ui.showLoginView();
+            } else if (e.target.matches('#go-to-browse')) {
+                e.preventDefault();
+                ui.showBrowseView(state.getCurrentUser());
+                taskActions.loadAllTasks();
+            } else if (e.target.matches('#go-to-dashboard, #go-to-dashboard-from-browse, #go-to-dashboard-from-settings')) {
+                e.preventDefault();
+                ui.showAppView(state.getCurrentUser());
+                taskActions.loadDashboardTasks();
+            } else if (e.target.matches('#go-to-settings')) {
+                e.preventDefault();
+                ui.showSettingsView(state.getCurrentUser());
+            }
+        });
+
         // Auth
         ui.elements.loginForm.addEventListener('submit', handleLogin);
         ui.elements.registerForm.addEventListener('submit', handleRegister);
         ui.elements.globalLogoutBtn.addEventListener('click', handleLogout);
-
-        // View Switching
-        ui.elements.showRegisterLink.addEventListener('click', (e) => { e.preventDefault(); ui.showRegisterView(); });
-        ui.elements.showLoginLink.addEventListener('click', (e) => { e.preventDefault(); ui.showLoginView(); });
-        ui.elements.goToBrowseLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            ui.showBrowseView(state.getCurrentUser());
-            taskActions.loadAllTasks();
-        });
-        ui.elements.goToDashboardLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            ui.showAppView(state.getCurrentUser());
-            taskActions.loadDashboardTasks();
-        });
-        ui.elements.goToSettingsLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            ui.showSettingsView(state.getCurrentUser());
-        });
 
         // Task Form
         ui.elements.taskForm.addEventListener('submit', taskActions.handleAddTask);

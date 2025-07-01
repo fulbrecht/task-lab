@@ -412,79 +412,56 @@ button[type="submit"]:hover {
     /* Input, select, button styles are already handled by general #task-form rules */
 }
 
-#dashboard-task-list,
-#browse-task-list {
+.task-list {
     list-style: none;
     padding: 0;
     margin-top: 25px;
 }
 
-/* Sizing based on priority for dashboard tasks */
-#dashboard-task-list li {
-    transition: all 0.3s ease; /* Smooth transition for size changes */
-    margin-bottom: 10px; /* Add space between tasks */
-    border-radius: 8px; /* Add some rounded corners to the task items */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); /* Subtle shadow for depth */
-}
-
-#dashboard-task-list li:last-child {
-    margin-bottom: 0; /* No margin for the last one */
-}
-
-#dashboard-task-list li.priority-size-1 {
-    font-size: 1.3rem;
-    padding: 20px 15px;
-    min-height: 80px; /* Ensure a minimum height */
-    border: 2px solid var(--high-priority); /* Distinct high-priority border */
-    background-color: #fff8f8; /* Very light red background */
-}
-
-#dashboard-task-list li.priority-size-2 {
-    font-size: 1.1rem;
-    padding: 18px 12px;
-    min-height: 70px; /* Ensure a minimum height */
-    border: 1px solid #ffb74d; /* Medium priority border */
-    background-color: #fffdf8; /* Very light orange background */
-}
-
-#dashboard-task-list li.priority-size-3 {
-    font-size: 1rem;
-    padding: 15px 10px;
-    min-height: 60px; /* Ensure a minimum height */
-    border: 1px solid #81c784; /* Low priority border */
-    background-color: #f8fff8; /* Very light green background */
-}
-
-#dashboard-task-list li,
-#browse-task-list li {
+/* Unified Task Item Styling */
+.task-list li {
     display: flex;
     align-items: center;
-    padding: 15px 10px;
-    border-bottom: 1px solid #eee;
-    transition: background-color 0.2s ease;
-    word-break: normal; /* Allow normal word wrapping */
-    overflow-wrap: break-word; /* Break long words if they don't fit */
-    cursor: pointer; /* Make the entire list item clickable */
+    padding: 12px 15px;
+    margin-bottom: 12px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+    transition: all 0.3s ease;
+    word-break: normal;
+    overflow-wrap: break-word;
+    cursor: pointer;
 }
 
-#dashboard-task-list li:hover,
-#browse-task-list li:hover {
-    background-color: #f9f9f9;
+.task-list li:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-#dashboard-task-list li:last-child,
-#browse-task-list li:last-child {
-    border-bottom: none;
+.task-list li:last-child {
+    margin-bottom: 0;
 }
 
-.task-title {
-    /* cursor: pointer; */ /* No longer needed, moved to li */
+/* Priority-based styling for all task lists */
+.task-list li.priority-1 {
+    border-left: 5px solid var(--high-priority);
+    background-color: #fff8f8;
 }
 
-#dashboard-task-list li.completed,
-#browse-task-list li.completed {
+.task-list li.priority-2 {
+    border-left: 5px solid #ffb74d;
+    background-color: #fffdf8;
+}
+
+.task-list li.priority-3 {
+    border-left: 5px solid #81c784;
+    background-color: #f8fff8;
+}
+
+.task-list li.completed {
     text-decoration: line-through;
     color: #aaa;
+    background-color: #f9f9f9;
+    border-left-color: #ccc;
 }
 
 .priority-indicator {
