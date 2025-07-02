@@ -43,6 +43,36 @@ router.post('/subscribe', async (req, res) => {
     }
 });
 
+// Route to send a test notification
+router.post('/test', async (req, res) => {
+    const userId = req.user._id;
+    try {
+        const user = await User.findById(userId);
+        if (!user || !user.subscriptions || user.subscriptions.length === 0) {
+            return res.status(404).json({ message: 'No push subscriptions found for this user.' });
+        }
+
+        const payload = JSON.stringify({
+            title: 'Test Notification',
+            body: 'If you received this, your push notifications are working!',
+        });
+
+        // Send a notification to all of the user's subscriptions
+        await Promise.all(user.subscriptions.map(sub => 
+            webpush.sendNotification(sub, payload)
+        ));
+
+        res.status(200).json({ message: 'Test notification sent successfully.' });
+    } catch (error) {
+        console.error('Error sending test notification:', error);
+        // Check for specific web-push errors
+        if (error.statusCode) {
+            return res.status(error.statusCode).json({ message: `Failed to send notification: ${error.body}` });
+        }
+        res.status(500).json({ message: 'Failed to send test notification.' });
+    }
+});
+
 // Function to send notifications for tasks that are due
 const sendTaskNotifications = async (userId) => {
     try {

@@ -137,6 +137,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 ui.elements.enableNotificationsBtn.disabled = true;
             });
         }
+        const testNotificationBtn = document.getElementById('test-notification-btn');
+        if (testNotificationBtn) {
+            testNotificationBtn.addEventListener('click', async () => {
+                try {
+                    await api.sendTestNotification();
+                    ui.showToast('Test notification sent!');
+                } catch (error) {
+                    console.error('Failed to send test notification:', error);
+                    ui.showToast(`Error: ${error.message}`);
+                }
+            });
+        }
 
         // Global
         ui.elements.globalRefreshBtn.addEventListener('click', () => window.location.reload(true));

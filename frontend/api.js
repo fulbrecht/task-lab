@@ -37,8 +37,11 @@ export async function register(username, password) {
 }
 
 export async function logout() {
-    const res = await fetch(`${API_BASE_URL}/logout`);
-    return handleResponse(res);
+    return await request('/api/logout', { method: 'POST' });
+}
+
+export async function sendTestNotification() {
+    return await request('/api/notifications/test', { method: 'POST' });
 }
 
 export async function checkAuthStatus() {
