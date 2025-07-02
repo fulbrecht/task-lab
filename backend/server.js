@@ -36,7 +36,6 @@ if (!vapidKeys.publicKey || !vapidKeys.privateKey) {
 // --- Middleware ---
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, '../frontend')));
 
 // --- Session Configuration ---
 app.use(
@@ -90,6 +89,10 @@ passport.deserializeUser(async (id, done) => {
 app.use('/api', authRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/notifications', notificationRoutes);
+
+// --- Serve Frontend Static Files ---
+// This must come AFTER all API routes
+app.use(express.static(path.join(__dirname, '../frontend')));
 
 // --- Serve Frontend (Catch-all) ---
 // This must come AFTER all API routes
