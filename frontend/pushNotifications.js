@@ -33,7 +33,7 @@ async function subscribeUserToPush() {
         }
 
         // Fetch the VAPID public key from the server.
-        const response = await fetch('/api/vapidPublicKey');
+        const response = await fetch('/api/notifications/vapidPublicKey');
         if (!response.ok) throw new Error('Failed to get VAPID public key from server.');
         const vapidPublicKey = await response.text();
         const applicationServerKey = urlBase64ToUint8Array(vapidPublicKey);
@@ -63,4 +63,3 @@ export async function initializePushNotifications() {
     const permission = await Notification.requestPermission();
     if (permission === 'granted') await subscribeUserToPush();
 }
-
