@@ -8,6 +8,8 @@ const MongoStore = require('connect-mongo');
 const webpush = require('web-push');
 require('dotenv').config();
 
+// --- Environment
+
 const User = require('./models/user'); // Import the User model
 const authRoutes = require('./routes/auth');
 const taskRoutes = require('./routes/tasks');
