@@ -65,25 +65,56 @@ document.addEventListener('DOMContentLoaded', () => {
         taskActions.loadDashboardTasks();
     }
 
-    """    // --- Event Delegation for Task List ---
-    let touchStartX = 0;
-    let touchEndX = 0;
+    // --- Event Delegation for Task List (Swipe for Touch and Mouse) ---
+    let startX = 0;
+    let endX = 0;
+    let isMouseDown = false;
+    let targetLi = null;
 
-    function handleTouchStart(e) {
-        const li = e.target.closest('li[data-id]');
-        if (!li) return;
-        touchStartX = e.changedTouches[0].screenX;
+    function handleGestureStart(e) {
+        // Ignore swipes on controls like buttons or select dropdowns
+        if (e.target.closest('.task-controls')) {
+            return;
+        }
+        
+        targetLi = e.target.closest('li[data-id]');
+        if (!targetLi) return;
+
+        if (e.type === 'touchstart') {
+            startX = e.changedTouches[0].screenX;
+        } else if (e.type === 'mousedown') {
+            isMouseDown = true;
+            startX = e.screenX;
+            e.preventDefault(); // Prevents text selection
+        }
     }
 
-    function handleTouchEnd(e) {
-        const li = e.target.closest('li[data-id]');
-        if (!li) return;
-        touchEndX = e.changedTouches[0].screenX;
-        handleSwipe(li);
+    function handleGestureEnd(e) {
+        if (!targetLi) return;
+
+        if (e.type === 'touchend') {
+            endX = e.changedTouches[0].screenX;
+            handleSwipe(targetLi, startX, endX);
+        } else if (e.type === 'mouseup') {
+            if (!isMouseDown) return;
+            isMouseDown = false;
+            endX = e.screenX;
+            handleSwipe(targetLi, startX, endX);
+        }
+        targetLi = null;
     }
 
-    function handleSwipe(li) {
-        if (touchEndX < touchStartX - 50) { // Swiped left
+    function handleMouseLeave(e) {
+        // If mouse leaves the document while dragging, cancel the swipe
+        if (isMouseDown) {
+            isMouseDown = false;
+            targetLi = null;
+        }
+    }
+
+    function handleSwipe(li, swipeStartX, swipeEndX) {
+        // A left swipe is when the end x-coordinate is significantly less than the start.
+        if (swipeEndX < swipeStartX - 50) {
             const taskId = li.dataset.id;
             taskActions.snoozeTask(taskId);
         }
@@ -178,8 +209,11 @@ document.addEventListener('DOMContentLoaded', () => {
         ui.elements.globalRefreshBtn.addEventListener('click', () => window.location.reload(true));
         document.body.addEventListener('click', handleTaskListClick);
         document.body.addEventListener('change', handleTaskPriorityChange);
-        document.body.addEventListener('touchstart', handleTouchStart, { passive: true });
-        document.body.addEventListener('touchend', handleTouchEnd);
+        document.body.addEventListener('touchstart', handleGestureStart, { passive: true });
+        document.body.addEventListener('touchend', handleGestureEnd);
+        document.body.addEventListener('mousedown', handleGestureStart);
+        document.body.addEventListener('mouseup', handleGestureEnd);
+        document.body.addEventListener('mouseleave', handleMouseLeave);
         document.addEventListener('click', (event) => {
             if (ui.elements.mainMenu.classList.contains('open') && !ui.elements.hamburgerMenuBtn.contains(event.target) && !ui.elements.mainMenu.contains(event.target)) {
                 ui.elements.mainMenu.classList.remove('open');
