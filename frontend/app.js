@@ -65,7 +65,31 @@ document.addEventListener('DOMContentLoaded', () => {
         taskActions.loadDashboardTasks();
     }
 
-    // --- Event Delegation for Task List ---
+    """    // --- Event Delegation for Task List ---
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    function handleTouchStart(e) {
+        const li = e.target.closest('li[data-id]');
+        if (!li) return;
+        touchStartX = e.changedTouches[0].screenX;
+    }
+
+    function handleTouchEnd(e) {
+        const li = e.target.closest('li[data-id]');
+        if (!li) return;
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe(li);
+    }
+
+    function handleSwipe(li) {
+        if (touchEndX < touchStartX - 50) { // Swiped left
+            const taskId = li.dataset.id;
+            taskActions.snoozeTask(taskId);
+        }
+    }
+
+""
     function handleTaskListClick(e) {
         const li = e.target.closest('li[data-id]');
         if (!li) return;
@@ -154,6 +178,8 @@ document.addEventListener('DOMContentLoaded', () => {
         ui.elements.globalRefreshBtn.addEventListener('click', () => window.location.reload(true));
         document.body.addEventListener('click', handleTaskListClick);
         document.body.addEventListener('change', handleTaskPriorityChange);
+        document.body.addEventListener('touchstart', handleTouchStart, { passive: true });
+        document.body.addEventListener('touchend', handleTouchEnd);
         document.addEventListener('click', (event) => {
             if (ui.elements.mainMenu.classList.contains('open') && !ui.elements.hamburgerMenuBtn.contains(event.target) && !ui.elements.mainMenu.contains(event.target)) {
                 ui.elements.mainMenu.classList.remove('open');
