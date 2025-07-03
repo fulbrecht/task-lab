@@ -87,3 +87,8 @@ export async function updateTask(id, updates) {
     });
     return handleResponse(res);
 }
+
+export async function snoozeTask(id) {
+    const res = await fetch(`${API_BASE_URL}/tasks/${id}/snooze`, { method: 'POST' });
+    return handleResponse(res);
+}

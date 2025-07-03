@@ -116,6 +116,27 @@ router.put('/:id', async (req, res, next) => {
   }
 });
 
+// SNOOZE a task
+router.post('/:id/snooze', async (req, res, next) => {
+    try {
+        const now = new Date();
+        const prioritySchedule = new Date(now.getTime() + 60 * 60 * 1000); // 1 hour from now
+
+        const updatedTask = await Task.findOneAndUpdate(
+            { _id: req.params.id, user: req.user._id },
+            { $set: { priority: 3, prioritySchedule } }, // 3: Low priority
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedTask) {
+            return res.status(404).json({ message: 'Task not found or you do not have permission to edit it.' });
+        }
+        res.json(updatedTask);
+    } catch (error) {
+        next(error);
+    }
+});
+
 // DELETE a task
 router.delete('/:id', async (req, res, next) => {
   try {

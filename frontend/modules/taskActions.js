@@ -123,6 +123,29 @@ export async function updateTaskPriority(id, priority) {
     }
 }
 
+export async function snoozeTask(id) {
+    const taskElements = document.querySelectorAll(`li[data-id="${id}"]`);
+    if (taskElements.length > 0) {
+        taskElements.forEach(el => {
+            el.classList.add('snoozed');
+            // Remove the element after the animation completes
+            setTimeout(() => {
+                el.remove();
+            }, 500); // Match the animation duration
+        });
+    }
+
+    try {
+        await api.snoozeTask(id);
+        // No need to reload here, as the task is visually removed
+    } catch (error) {
+        console.error('Failed to snooze task:', error);
+        // If the API call fails, we should probably restore the task
+        loadDashboardTasks(); 
+        loadAllTasks();
+    }
+}
+
 // --- Task Editing ---
 export function handleEditClick(event) {
     const li = event.target.closest('li[data-id]');

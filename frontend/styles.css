@@ -437,6 +437,21 @@ button[type="submit"]:hover {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
+.task-list li.snoozed {
+    animation: snooze-animation 0.5s ease-out;
+}
+
+@keyframes snooze-animation {
+    0% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(-100px);
+        opacity: 0;
+    }
+}
+
 .task-list li:last-child {
     margin-bottom: 0;
 }
