@@ -99,6 +99,26 @@
 
     <button id="show-task-form-btn" class="fab" title="Add New Task">+</button>
 
+    <!-- Edit Task Form Container -->
+    <div id="edit-task-container" style="display: none;">
+        <h2>Edit Task</h2>
+        <form id="edit-task-form">
+            <input type="hidden" id="edit-task-id">
+            <input type="text" id="edit-task-title" placeholder="Task Title" required>
+            <select id="edit-task-priority" title="Set task priority">
+                <option value="1">High</option>
+                <option value="2">Medium</option>
+                <option value="3">Low</option>
+            </select>
+            <label for="edit-task-priority-schedule">Priority Schedule:</label>
+            <input type="datetime-local" id="edit-task-priority-schedule" title="Schedule priority change">
+            <label for="edit-task-notification-date">Notification Date:</label>
+            <input type="datetime-local" id="edit-task-notification-date" title="Set notification date">
+            <button type="submit">Save Changes</button>
+            <button type="button" id="cancel-edit-task-btn">Cancel</button>
+        </form>
+    </div>
+
     <!-- IndexedDB Library for offline support -->
     <script src="https://cdn.jsdelivr.net/npm/idb@7/build/umd.js"></script>
 

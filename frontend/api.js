@@ -92,3 +92,8 @@ export async function snoozeTask(id) {
     const res = await fetch(`${API_BASE_URL}/tasks/${id}/snooze`, { method: 'POST' });
     return handleResponse(res);
 }
+
+export async function getTask(id) {
+    const res = await fetch(`${API_BASE_URL}/tasks/${id}`);
+    return handleResponse(res);
+}

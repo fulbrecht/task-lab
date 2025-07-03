@@ -11,6 +11,7 @@ export const elements = {
     hamburgerMenuBtn: document.getElementById('hamburger-menu-btn'),
     usernameDisplay: document.getElementById('username-display'),
     addTaskContainer: document.getElementById('add-task-container'),
+    editTaskContainer: document.getElementById('edit-task-container'),
     showTaskFormBtn: document.getElementById('show-task-form-btn'),
     dashboardTaskList: document.getElementById('dashboard-task-list'),
     browseTaskList: document.getElementById('browse-task-list'),
@@ -24,6 +25,7 @@ export const elements = {
     loginForm: document.getElementById('login-form'),
     registerForm: document.getElementById('register-form'),
     taskForm: document.getElementById('task-form'),
+    editTaskForm: document.getElementById('edit-task-form'),
     settingsForm: document.getElementById('settings-form'),
     showRegisterLink: document.getElementById('show-register'),
     showLoginLink: document.getElementById('show-login'),
@@ -33,7 +35,13 @@ export const elements = {
     globalLogoutBtn: document.getElementById('global-logout-btn'),
     globalRefreshBtn: document.getElementById('global-refresh-btn'),
     cancelAddTaskBtn: document.getElementById('cancel-add-task-btn'),
+    cancelEditTaskBtn: document.getElementById('cancel-edit-task-btn'),
     enableNotificationsBtn: document.getElementById('enable-notifications-btn'),
+    editTaskId: document.getElementById('edit-task-id'),
+    editTaskTitle: document.getElementById('edit-task-title'),
+    editTaskPriority: document.getElementById('edit-task-priority'),
+    editTaskPrioritySchedule: document.getElementById('edit-task-priority-schedule'),
+    editTaskNotificationDate: document.getElementById('edit-task-notification-date'),
 };
 
 // --- UI Toggling ---
@@ -43,10 +51,11 @@ function hideAllViews() {
     elements.browseContainer.style.display = 'none';
     elements.settingsContainer.style.display = 'none';
     elements.addTaskContainer.style.display = 'none';
+    elements.editTaskContainer.style.display = 'none';
     elements.showTaskFormBtn.style.display = 'none';
     elements.mainMenu.classList.remove('open');
     elements.hamburgerMenuBtn.classList.remove('open');
-}
+}""
 
 export function showLoginView() {
     hideAllViews();

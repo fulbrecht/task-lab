@@ -147,53 +147,51 @@ export async function snoozeTask(id) {
 }
 
 // --- Task Editing ---
-export function handleEditClick(event) {
+export async function handleEditClick(event) {
     const li = event.target.closest('li[data-id]');
     if (!li) return;
     const taskId = li.dataset.id;
-    const currentTitleSpan = li.querySelector('.task-title');
-    if (currentTitleSpan.tagName === 'INPUT') return;
-    const originalTitle = currentTitleSpan.textContent;
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.value = originalTitle;
-    input.className = 'task-title-edit-input';
-    currentTitleSpan.replaceWith(input);
-    input.focus();
-    input.addEventListener('blur', () => saveOrCancelEdit(li, taskId, input, originalTitle));
-    input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            input.blur();
-        } else if (e.key === 'Escape') {
-            cancelEdit(li, input, originalTitle);
-        }
-    });
-}
 
-async function saveOrCancelEdit(li, taskId, inputElement, originalTitle) {
-    const newTitle = inputElement.value.trim();
-    if (newTitle === originalTitle || newTitle === '') {
-        cancelEdit(li, inputElement, originalTitle);
-        return;
-    }
     try {
-        await api.updateTask(taskId, { title: newTitle });
-        loadDashboardTasks();
-        loadAllTasks();
+        const task = await api.getTask(taskId);
+        elements.editTaskId.value = task._id;
+        elements.editTaskTitle.value = task.title;
+        elements.editTaskPriority.value = task.priority;
+        elements.editTaskPrioritySchedule.value = task.prioritySchedule ? new Date(task.prioritySchedule).toISOString().slice(0, 16) : '';
+        elements.editTaskNotificationDate.value = task.notificationDate ? new Date(task.notificationDate).toISOString().slice(0, 16) : '';
+        elements.editTaskContainer.style.display = 'block';
+        elements.showTaskFormBtn.style.display = 'none';
     } catch (error) {
-        console.error('Failed to update task title:', error);
-        elements.authError.textContent = `Error updating task: ${error.message}`;
-        cancelEdit(li, inputElement, originalTitle);
+        console.error('Failed to fetch task for editing:', error);
+        showToast('Error fetching task details.');
     }
 }
 
-function cancelEdit(li, inputElement, originalTitle) {
-    const originalTitleSpan = document.createElement('span');
-    originalTitleSpan.className = 'task-title';
-    originalTitleSpan.textContent = originalTitle;
-    inputElement.replaceWith(originalTitleSpan);
+export async function handleUpdateTask(e) {
+    e.preventDefault();
+    const id = elements.editTaskId.value;
+    const updatedTask = {
+        title: elements.editTaskTitle.value.trim(),
+        priority: parseInt(elements.editTaskPriority.value, 10),
+        prioritySchedule: elements.editTaskPrioritySchedule.value ? new Date(elements.editTaskPrioritySchedule.value).toISOString() : null,
+        notificationDate: elements.editTaskNotificationDate.value ? new Date(elements.editTaskNotificationDate.value).toISOString() : null,
+    };
+
+    if (updatedTask.title) {
+        try {
+            await api.updateTask(id, updatedTask);
+            elements.editTaskContainer.style.display = 'none';
+            elements.showTaskFormBtn.style.display = 'block';
+            showToast('Task updated successfully!');
+            loadDashboardTasks();
+            loadAllTasks();
+        } catch (error) {
+            console.error('Failed to update task:', error);
+            elements.authError.textContent = `Error: ${error.message}`;
+        }
+    }
 }
+
 
 // --- Add Task Form Handler ---
 export async function handleAddTask(e) {

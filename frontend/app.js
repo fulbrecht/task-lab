@@ -67,9 +67,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Event Delegation for Task List (Swipe for Touch and Mouse) ---
     let startX = 0;
-    let endX = 0;
     let isMouseDown = false;
     let targetLi = null;
+    let currentX = 0;
+    let isSwiping = false;
 
     function handleGestureStart(e) {
         // Ignore swipes on controls like buttons or select dropdowns
@@ -87,28 +88,65 @@ document.addEventListener('DOMContentLoaded', () => {
             startX = e.screenX;
             e.preventDefault(); // Prevents text selection
         }
+        currentX = startX;
+        isSwiping = false;
+        if (targetLi) {
+            targetLi.style.transition = 'transform 0s';
+        }
+    }
+
+    function handleGestureMove(e) {
+        if (!targetLi || (e.type === 'mousemove' && !isMouseDown)) return;
+
+        if (e.type === 'touchmove') {
+            currentX = e.changedTouches[0].screenX;
+        } else { // mousemove
+            currentX = e.screenX;
+        }
+
+        const diffX = currentX - startX;
+        if (Math.abs(diffX) > 10) {
+            isSwiping = true;
+        }
+
+        if (diffX < 0) { // Only visualize left swipe
+            targetLi.style.transform = `translateX(${diffX}px)`;
+        } else {
+            targetLi.style.transform = 'translateX(0)';
+        }
     }
 
     function handleGestureEnd(e) {
         if (!targetLi) return;
 
         if (e.type === 'touchend') {
-            endX = e.changedTouches[0].screenX;
-            handleSwipe(targetLi, startX, endX);
-        } else if (e.type === 'mouseup') {
-            if (!isMouseDown) return;
-            isMouseDown = false;
-            endX = e.screenX;
-            handleSwipe(targetLi, startX, endX);
+            currentX = e.changedTouches[0].screenX;
         }
+        
+        isMouseDown = false;
+
+        const diffX = currentX - startX;
+
+        if (diffX < -50) { // Swipe threshold
+            handleSwipe(targetLi, startX, currentX);
+        } else {
+            // Not a swipe, or not far enough, animate back
+            targetLi.style.transition = 'transform 0.3s ease';
+            targetLi.style.transform = 'translateX(0)';
+            targetLi.addEventListener('transitionend', () => {
+                if (targetLi) {
+                    targetLi.style.transition = '';
+                }
+            }, { once: true });
+        }
+        
         targetLi = null;
     }
 
     function handleMouseLeave(e) {
         // If mouse leaves the document while dragging, cancel the swipe
         if (isMouseDown) {
-            isMouseDown = false;
-            targetLi = null;
+            handleGestureEnd(e);
         }
     }
 
@@ -120,8 +158,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-""
     function handleTaskListClick(e) {
+        if (isSwiping) {
+            isSwiping = false;
+            return;
+        }
         const li = e.target.closest('li[data-id]');
         if (!li) return;
         if (e.target.closest('.task-controls')) {
@@ -183,6 +224,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         ui.elements.cancelAddTaskBtn.addEventListener('click', ui.hideAddTaskFormAndShowFab);
 
+        // Edit Task Form
+        ui.elements.editTaskForm.addEventListener('submit', taskActions.handleUpdateTask);
+        ui.elements.cancelEditTaskBtn.addEventListener('click', () => {
+            ui.elements.editTaskContainer.style.display = 'none';
+            ui.elements.showTaskFormBtn.style.display = 'block';
+        });
+
         // Settings
         ui.elements.settingsForm.addEventListener('submit', handleSaveSettings);
         if (ui.elements.enableNotificationsBtn) {
@@ -210,8 +258,10 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.addEventListener('click', handleTaskListClick);
         document.body.addEventListener('change', handleTaskPriorityChange);
         document.body.addEventListener('touchstart', handleGestureStart, { passive: true });
+        document.body.addEventListener('touchmove', handleGestureMove, { passive: true });
         document.body.addEventListener('touchend', handleGestureEnd);
         document.body.addEventListener('mousedown', handleGestureStart);
+        document.body.addEventListener('mousemove', handleGestureMove);
         document.body.addEventListener('mouseup', handleGestureEnd);
         document.body.addEventListener('mouseleave', handleMouseLeave);
         document.addEventListener('click', (event) => {
@@ -221,6 +271,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             if (ui.elements.addTaskContainer.style.display === 'block' && !ui.elements.showTaskFormBtn.contains(event.target) && !ui.elements.addTaskContainer.contains(event.target)) {
                 ui.hideAddTaskFormAndShowFab();
+            }
+            if (ui.elements.editTaskContainer.style.display === 'block' && !event.target.closest('.edit-task-btn') && !ui.elements.editTaskContainer.contains(event.target)) {
+                ui.elements.editTaskContainer.style.display = 'none';
+                ui.elements.showTaskFormBtn.style.display = 'block';
             }
         });
         ui.elements.hamburgerMenuBtn.addEventListener('click', () => {

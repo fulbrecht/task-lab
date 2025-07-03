@@ -69,6 +69,19 @@ router.get('/', async (req, res, next) => {
   }
 });
 
+// GET a single task by ID
+router.get('/:id', async (req, res, next) => {
+  try {
+    const task = await Task.findOne({ _id: req.params.id, user: req.user._id });
+    if (!task) {
+      return res.status(404).json({ message: 'Task not found' });
+    }
+    res.json(task);
+  } catch (error) {
+    next(error);
+  }
+});
+
 // POST a new task
 router.post('/', async (req, res, next) => {
   const task = new Task({
