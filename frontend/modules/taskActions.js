@@ -18,6 +18,21 @@ export async function loadDashboardTasks() {
 export async function loadAllTasks() {
     try {
         const tasks = await api.loadTasks();
+
+        // Sort tasks: uncompleted first, then completed by newest
+        tasks.sort((a, b) => {
+            if (a.completed && !b.completed) {
+                return 1;
+            }
+            if (!a.completed && b.completed) {
+                return -1;
+            }
+            if (a.completed && b.completed) {
+                return new Date(b.completedTimestamp) - new Date(a.completedTimestamp);
+            }
+            return 0; // Keep original order for uncompleted tasks
+        });
+
         renderTasks(tasks, elements.browseTaskList, true);
         scheduleNotifications(tasks);
     } catch (error) {
@@ -89,39 +104,7 @@ export async function toggleTaskCompletion(id, completed) {
     }
 }
 
-export async function updateTaskPriority(id, priority) {
-    const taskElements = document.querySelectorAll(`li[data-id="${id}"]`);
-    const oldPriorities = new Map();
 
-    // Optimistically update the UI
-    if (taskElements.length > 0) {
-        taskElements.forEach(el => {
-            const oldPriority = el.className.match(/priority-(\d)/)[1];
-            oldPriorities.set(el, oldPriority);
-            el.classList.remove(`priority-${oldPriority}`);
-            el.classList.add(`priority-${priority}`);
-        });
-    }
-
-    try {
-        await api.updateTask(id, { priority: parseInt(priority, 10) });
-        // A short delay to let the user see the change before the list reorders
-        setTimeout(() => {
-            loadDashboardTasks();
-            loadAllTasks();
-        }, 300); // 300ms delay
-    } catch (error) {
-        console.error('Failed to update priority', error);
-        // Revert the UI changes on failure
-        if (taskElements.length > 0) {
-            taskElements.forEach(el => {
-                el.classList.remove(`priority-${priority}`);
-                el.classList.add(`priority-${oldPriorities.get(el)}`);
-            });
-        }
-        loadAllTasks(); // Still try to reload to get the correct state from the server
-    }
-}
 
 export async function snoozeTask(id) {
     const taskElements = document.querySelectorAll(`li[data-id="${id}"]`);
@@ -137,6 +120,8 @@ export async function snoozeTask(id) {
 
     try {
         await api.snoozeTask(id);
+        loadDashboardTasks(); 
+        loadAllTasks();
         // No need to reload here, as the task is visually removed
     } catch (error) {
         console.error('Failed to snooze task:', error);

@@ -17,31 +17,29 @@ function createTaskElement(task, showControls) {
     titleSpan.textContent = task.title;
     li.appendChild(titleSpan);
 
-    const controlsContainer = document.createElement('div');
-    controlsContainer.className = 'task-controls';
-
-    if (showControls) {
-        const prioritySelect = document.createElement('select');
-        prioritySelect.title = "Change task priority";
-        prioritySelect.innerHTML = `
-            <option value="1" ${task.priority === 1 ? 'selected' : ''}>High</option>
-            <option value="2" ${task.priority === 2 ? 'selected' : ''}>Medium</option>
-            <option value="3" ${task.priority === 3 ? 'selected' : ''}>Low</option>
-        `;
-        controlsContainer.appendChild(prioritySelect);
+    if (task.completed && task.completedTimestamp) {
+        const timestampSpan = document.createElement('span');
+        timestampSpan.className = 'completed-timestamp';
+        timestampSpan.textContent = `Completed: ${new Date(task.completedTimestamp).toLocaleString()}`;
+        li.appendChild(timestampSpan);
     }
 
-    const editBtn = document.createElement('button');
-    editBtn.className = 'edit-task-btn';
-    editBtn.innerHTML = '&#9998;';
-    controlsContainer.appendChild(editBtn);
+    if (showControls) {
+        const controlsContainer = document.createElement('div');
+        controlsContainer.className = 'task-controls';
 
-    const deleteBtn = document.createElement('button');
-    deleteBtn.className = 'delete-task-btn';
-    deleteBtn.textContent = 'Delete';
-    controlsContainer.appendChild(deleteBtn);
-    
-    li.appendChild(controlsContainer);
+        const editBtn = document.createElement('button');
+        editBtn.className = 'edit-task-btn';
+        editBtn.innerHTML = '&#9998;';
+        controlsContainer.appendChild(editBtn);
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'delete-task-btn';
+        deleteBtn.textContent = 'Delete';
+        controlsContainer.appendChild(deleteBtn);
+        
+        li.appendChild(controlsContainer);
+    }
     return li;
 }
 

@@ -177,12 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
         taskActions.toggleTaskCompletion(li.dataset.id, !isCompleted);
     }
 
-    function handleTaskPriorityChange(e) {
-        if (!e.target.matches('.task-controls select')) return;
-        const li = e.target.closest('li[data-id]');
-        if (!li) return;
-        taskActions.updateTaskPriority(li.dataset.id, e.target.value);
-    }
+    
 
     // --- Setup All Event Listeners ---
     function initializeEventListeners() {
@@ -256,7 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Global
         ui.elements.globalRefreshBtn.addEventListener('click', () => window.location.reload(true));
         document.body.addEventListener('click', handleTaskListClick);
-        document.body.addEventListener('change', handleTaskPriorityChange);
+        
         document.body.addEventListener('touchstart', handleGestureStart, { passive: true });
         document.body.addEventListener('touchmove', handleGestureMove, { passive: true });
         document.body.addEventListener('touchend', handleGestureEnd);

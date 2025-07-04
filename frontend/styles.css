@@ -479,6 +479,12 @@ button[type="submit"]:hover {
     border-left-color: #ccc;
 }
 
+.completed-timestamp {
+    margin-left: auto;
+    font-size: 0.8rem;
+    color: #999;
+}
+
 .priority-indicator {
     width: 12px;
     height: 12px;
