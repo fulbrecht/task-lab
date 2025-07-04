@@ -33,12 +33,19 @@ const updateScheduledPriorities = async (userId) => {
     }
   };
 
-// Middleware to update priorities and send notifications before fetching tasks
+const processTasksMiddleware = async (req, res, next) => {
+  // Run these tasks in parallel for efficiency
+  await Promise.all([
+    updateScheduledPriorities(req.user._id),
+    sendTaskNotifications(req.user._id)
+  ]);
+  next();
+};
 
 
 
 // GET top 3 priority tasks for the dashboard (uncompleted only)
-router.get('/dashboard', async (req, res, next) => {
+router.get('/dashboard', processTasksMiddleware, async (req, res, next) => {
   try {
     // Get limit from query, default to 3, and parse as integer.
     let limit = parseInt(req.query.limit, 10) || 3;
@@ -46,6 +53,7 @@ router.get('/dashboard', async (req, res, next) => {
     if (limit < 1 || limit > 10) {
         limit = 3;
     }
+
 
     const tasks = await Task.find({ user: req.user._id, completed: false })
       .sort({ priority: 1, createdAt: 1 }) // Sort by priority (1=High), then age (oldest first)
@@ -58,10 +66,25 @@ router.get('/dashboard', async (req, res, next) => {
 });
 
 // GET all tasks for a user (for the browse page)
-router.get('/', async (req, res, next) => {
+router.get('/', processTasksMiddleware, async (req, res, next) => {
   try {
-     // Sort by creation date for a predictable order on the browse page
-    const tasks = await Task.find({ user: req.user._id }).sort({ createdAt: -1 });
+    const tasks = await Task.find({ user: req.user._id });
+
+    // Perform complex sorting on the server for consistency.
+    // Sort order:
+    // 1. Uncompleted tasks before completed tasks.
+    // 2. Uncompleted tasks by priority (1-High first), then by creation date (oldest first).
+    // 3. Completed tasks by completion date (newest first).
+    tasks.sort((a, b) => {
+      if (a.completed !== b.completed) {
+        return a.completed ? 1 : -1;
+      }
+      if (!a.completed) { // Both are uncompleted
+        return a.priority - b.priority || new Date(a.createdAt) - new Date(b.createdAt);
+      }
+      // Both are completed
+      return new Date(b.completedTimestamp) - new Date(a.completedTimestamp);
+    });
 
     res.json(tasks);
   } catch (error) {
@@ -103,12 +126,13 @@ router.post('/', async (req, res, next) => {
 // PUT (update) a task
 router.put('/:id', async (req, res, next) => {
   try {
-    const { title, completed, priority, prioritySchedule, notificationDate } = req.body;
+    const { title, completed, completedTimestamp, priority, prioritySchedule, notificationDate } = req.body;
     const updates = {};
     if (title != null) updates.title = title;
     if (completed != null) updates.completed = completed;
     if (priority != null) updates.priority = priority;
     if (prioritySchedule != null) updates.prioritySchedule = prioritySchedule;
+    if (completedTimestamp !== undefined) updates.completedTimestamp = completedTimestamp;
     if (notificationDate != null) {
         updates.notificationDate = notificationDate;
         updates.notificationSent = false; // Reset notification status

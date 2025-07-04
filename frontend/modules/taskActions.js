@@ -2,6 +2,22 @@ import * as api from '../api.js';
 import { elements, showToast, hideAddTaskFormAndShowFab } from './ui.js';
 import { renderTasks } from './taskRenderer.js';
 
+/**
+ * Reloads the data for the currently active view (Dashboard or Browse All).
+ * This ensures the UI is always in sync with the database after an action.
+ */
+async function reloadCurrentView() {
+    try {
+        if (elements.appContainer.style.display === 'block') {
+            await loadDashboardTasks();
+        } else if (elements.browseContainer.style.display === 'block') {
+            await loadAllTasks();
+        }
+    } catch (error) {
+        console.error('Error reloading current view:', error);
+    }
+}
+
 // --- Task Data Loading ---
 export async function loadDashboardTasks() {
     try {
@@ -82,11 +98,10 @@ export async function deleteTask(id) {
     }
     try {
         await api.deleteTask(id);
-        loadDashboardTasks();
+        await reloadCurrentView();
     } catch (error) {
         console.error('Failed to delete task:', error);
-        loadDashboardTasks();
-        loadAllTasks();
+        await reloadCurrentView(); // Restore task if deletion fails
     }
 }
 
@@ -96,8 +111,12 @@ export async function toggleTaskCompletion(id, completed) {
         taskElements.forEach(el => el.classList.toggle('completed', completed));
     }
     try {
-        await api.updateTask(id, { completed });
-        loadDashboardTasks();
+        const updatePayload = {
+            completed,
+            completedTimestamp: completed ? new Date() : null,
+        };
+        await api.updateTask(id, updatePayload);
+        await reloadCurrentView();
     } catch (error) {
         console.error('Failed to update task:', error);
         if (taskElements.length > 0) taskElements.forEach(el => el.classList.toggle('completed', !completed));
@@ -120,14 +139,10 @@ export async function snoozeTask(id) {
 
     try {
         await api.snoozeTask(id);
-        loadDashboardTasks(); 
-        loadAllTasks();
-        // No need to reload here, as the task is visually removed
+        await reloadCurrentView();
     } catch (error) {
         console.error('Failed to snooze task:', error);
-        // If the API call fails, we should probably restore the task
-        loadDashboardTasks(); 
-        loadAllTasks();
+        await reloadCurrentView(); // Restore task if snoozing failed
     }
 }
 
@@ -168,8 +183,7 @@ export async function handleUpdateTask(e) {
             elements.editTaskContainer.style.display = 'none';
             elements.showTaskFormBtn.style.display = 'block';
             showToast('Task updated successfully!');
-            loadDashboardTasks();
-            loadAllTasks();
+            await reloadCurrentView();
         } catch (error) {
             console.error('Failed to update task:', error);
             elements.authError.textContent = `Error: ${error.message}`;
@@ -195,7 +209,7 @@ export async function handleAddTask(e) {
             elements.taskNotificationDateInput.value = '';
             hideAddTaskFormAndShowFab();
             elements.taskInput.focus();
-            loadDashboardTasks();
+            await reloadCurrentView();
         } catch (error) {
             console.error('Failed to add task, attempting offline save.', error);
             if ('serviceWorker' in navigator && 'SyncManager' in window) {
