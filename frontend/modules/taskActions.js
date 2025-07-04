@@ -146,6 +146,27 @@ export async function snoozeTask(id) {
     }
 }
 
+/**
+ * Formats a date into a string suitable for a datetime-local input.
+ * The browser's `Date` object automatically handles the conversion from the UTC
+ * string (from the server) to the user's local time.
+ * @param {string | Date} date The date to format.
+ * @returns {string} The formatted date string (YYYY-MM-DDTHH:mm).
+ */
+function toLocalDatetimeString(date) {
+    if (!date) return '';
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return ''; // Invalid date
+
+    const year = d.getFullYear();
+    const month = (d.getMonth() + 1).toString().padStart(2, '0');
+    const day = d.getDate().toString().padStart(2, '0');
+    const hours = d.getHours().toString().padStart(2, '0');
+    const minutes = d.getMinutes().toString().padStart(2, '0');
+
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
 // --- Task Editing ---
 export async function handleEditClick(event) {
     const li = event.target.closest('li[data-id]');
@@ -157,8 +178,8 @@ export async function handleEditClick(event) {
         elements.editTaskId.value = task._id;
         elements.editTaskTitle.value = task.title;
         elements.editTaskPriority.value = task.priority;
-        elements.editTaskPrioritySchedule.value = task.prioritySchedule ? new Date(task.prioritySchedule).toISOString().slice(0, 16) : '';
-        elements.editTaskNotificationDate.value = task.notificationDate ? new Date(task.notificationDate).toISOString().slice(0, 16) : '';
+        elements.editTaskPrioritySchedule.value = toLocalDatetimeString(task.prioritySchedule);
+        elements.editTaskNotificationDate.value = toLocalDatetimeString(task.notificationDate);
         elements.editTaskContainer.style.display = 'block';
         elements.showTaskFormBtn.style.display = 'none';
     } catch (error) {
