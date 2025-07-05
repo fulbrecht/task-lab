@@ -1,0 +1,17 @@
+name: Trigger Ansible Deployment
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  trigger-deployment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger ansible-deploy workflow
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.PAT_FOR_DISPATCH }}
+          repository: fulbrecht/ansible-deploy
+          event-type: deploy-task-lab
