@@ -18,9 +18,13 @@ const taskSchema = new mongoose.Schema({
     priority: {
         type: Number,
         required: true,
-        default: 3, // 1: High, 2: Medium, 3: Low
+        default: 3, // 1: High, 2: Medium, 3: Low, 4: Snoozed
         min: 1,
-        max: 3
+        max: 4
+    },
+    originalPriority: {
+        type: Number,
+        default: null
     },
     dueDate: {
         type: Date,

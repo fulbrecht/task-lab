@@ -13,19 +13,34 @@ router.use((req, res, next) => {
 });
 
 // A function to apply priority updates based on schedules for all of a user's tasks.
-// This is more efficient as it uses a single DB query.
 const updateScheduledPriorities = async (userId) => {
     try {
       const now = new Date();
-      // Update all tasks for the user where the schedule has passed and priority isn't already high.
+      
+      // Restore priority for snoozed tasks whose schedule has passed
+      const snoozedTasks = await Task.find({
+        user: userId,
+        priority: 4, // Snoozed
+        prioritySchedule: { $exists: true, $ne: null, $lte: now },
+        completed: false,
+      });
+
+      for (const task of snoozedTasks) {
+        task.priority = task.originalPriority || 1; // default to high if no original
+        task.originalPriority = null;
+        task.prioritySchedule = null;
+        await task.save();
+      }
+
+      // Update other tasks to high priority where the schedule has passed
       await Task.updateMany(
         {
           user: userId,
+          priority: { $nin: [1, 4] }, // Not already high or snoozed
           prioritySchedule: { $exists: true, $ne: null, $lte: now },
-          priority: { $ne: 1 },
           completed: false, // Only update uncompleted tasks
         },
-        { $set: { priority: 1 } }
+        { $set: { priority: 1, prioritySchedule: null } }
       );
     } catch (error) {
       // Log the error but don't block the main request flow.
@@ -156,18 +171,26 @@ router.put('/:id', async (req, res, next) => {
 // SNOOZE a task
 router.post('/:id/snooze', async (req, res, next) => {
     try {
+        const task = await Task.findOne({ _id: req.params.id, user: req.user._id });
+        if (!task) {
+            return res.status(404).json({ message: 'Task not found or you do not have permission to edit it.' });
+        }
+
         const now = new Date();
         const prioritySchedule = new Date(now.getTime() + 60 * 60 * 1000); // 1 hour from now
 
         const updatedTask = await Task.findOneAndUpdate(
             { _id: req.params.id, user: req.user._id },
-            { $set: { priority: 3, prioritySchedule } }, // 3: Low priority
+            { 
+                $set: { 
+                    priority: 4, // 4: Snoozed
+                    originalPriority: task.priority, // Save the original priority
+                    prioritySchedule 
+                }
+            },
             { new: true, runValidators: true }
         );
 
-        if (!updatedTask) {
-            return res.status(404).json({ message: 'Task not found or you do not have permission to edit it.' });
-        }
         res.json(updatedTask);
     } catch (error) {
         next(error);

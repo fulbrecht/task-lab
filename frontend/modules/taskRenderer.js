@@ -17,6 +17,33 @@ function createTaskElement(task, showControls) {
     titleSpan.textContent = task.title;
     li.appendChild(titleSpan);
 
+    if (task.priority === 4 && task.prioritySchedule) {
+        const countdownSpan = document.createElement('span');
+        countdownSpan.className = 'snooze-countdown';
+        li.appendChild(countdownSpan);
+
+        const updateCountdown = () => {
+            const now = new Date();
+            const schedule = new Date(task.prioritySchedule);
+            const diff = schedule - now;
+
+            if (diff <= 0) {
+                countdownSpan.textContent = '(Snoozed)';
+                clearInterval(intervalId);
+                return;
+            }
+
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            countdownSpan.textContent = `(Snoozed for ${hours}h ${minutes}m ${seconds}s)`;
+        };
+
+        const intervalId = setInterval(updateCountdown, 1000);
+        updateCountdown(); // Initial call
+    }
+
     if (task.completed && task.completedTimestamp) {
         const timestampSpan = document.createElement('span');
         timestampSpan.className = 'completed-timestamp';
