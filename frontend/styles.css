@@ -437,6 +437,30 @@ button[type="submit"]:hover {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
+.snooze-feedback {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 20px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    font-weight: bold;
+    font-size: 1.2em;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+    pointer-events: none; /* Allow clicks to pass through */
+    border-radius: 8px;
+}
+
+.snooze-feedback.visible {
+    opacity: 1;
+}
+
 
 
 .task-list li:last-child {

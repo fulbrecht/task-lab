@@ -11,6 +11,10 @@ function createTaskElement(task, showControls) {
     }
     li.dataset.id = task._id;
 
+    const snoozeFeedback = document.createElement('div');
+    snoozeFeedback.className = 'snooze-feedback';
+    li.appendChild(snoozeFeedback);
+
     const priorityIndicator = document.createElement('div');
     priorityIndicator.className = `priority-indicator priority-${task.priority}`;
     li.appendChild(priorityIndicator);

@@ -111,8 +111,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (diffX < 0) { // Only visualize left swipe
             targetLi.style.transform = `translateX(${diffX}px)`;
+            const snoozeFeedback = targetLi.querySelector('.snooze-feedback');
+            if (snoozeFeedback) {
+                snoozeFeedback.classList.add('visible');
+                if (diffX < -150) {
+                    snoozeFeedback.textContent = 'Snooze 1 Week';
+                } else if (diffX < -100) {
+                    snoozeFeedback.textContent = 'Snooze 1 Day';
+                } else if (diffX < -50) {
+                    snoozeFeedback.textContent = 'Snooze 1 Hour';
+                } else {
+                    snoozeFeedback.textContent = '';
+                    snoozeFeedback.classList.remove('visible');
+                }
+            }
         } else {
             targetLi.style.transform = 'translateX(0)';
+            const snoozeFeedback = targetLi.querySelector('.snooze-feedback');
+            if (snoozeFeedback) {
+                snoozeFeedback.classList.remove('visible');
+            }
         }
     }
 
@@ -128,7 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const diffX = currentX - startX;
 
         if (diffX < -50) { // Swipe threshold
-            handleSwipe(targetLi, startX, currentX);
+            handleSwipe(targetLi, diffX);
         } else {
             // Not a swipe, or not far enough, animate back
             targetLi.style.transition = 'transform 0.3s ease';
@@ -139,7 +157,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }, { once: true });
         }
-        
+        const snoozeFeedback = targetLi ? targetLi.querySelector('.snooze-feedback') : null;
+        if (snoozeFeedback) {
+            snoozeFeedback.classList.remove('visible');
+        }
         targetLi = null;
     }
 
@@ -150,12 +171,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function handleSwipe(li, swipeStartX, swipeEndX) {
-        // A left swipe is when the end x-coordinate is significantly less than the start.
-        if (swipeEndX < swipeStartX - 50) {
-            const taskId = li.dataset.id;
-            taskActions.snoozeTask(taskId);
+    function handleSwipe(li, diffX) {
+        const taskId = li.dataset.id;
+        let duration = '1h'; // Default to 1 hour
+        if (diffX < -150) {
+            duration = '1w';
+        } else if (diffX < -100) {
+            duration = '1d';
         }
+        taskActions.snoozeTask(taskId, duration);
     }
 
     function handleTaskListClick(e) {

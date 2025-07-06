@@ -42,6 +42,7 @@ export const elements = {
     editTaskPriority: document.getElementById('edit-task-priority'),
     editTaskPrioritySchedule: document.getElementById('edit-task-priority-schedule'),
     editTaskNotificationDate: document.getElementById('edit-task-notification-date'),
+    snoozeFeedback: document.getElementById('snooze-feedback'),
 };
 
 // --- UI Toggling ---

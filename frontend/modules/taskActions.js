@@ -125,12 +125,12 @@ export async function toggleTaskCompletion(id, completed) {
 
 
 
-export async function snoozeTask(id) {
+export async function snoozeTask(id, duration) {
     const taskElements = document.querySelectorAll(`li[data-id="${id}"]`);
     // No direct DOM manipulation here, reloadCurrentView will handle rendering based on updated data
 
     try {
-        await api.snoozeTask(id);
+        await api.snoozeTask(id, duration);
         await reloadCurrentView();
     } catch (error) {
         console.error('Failed to snooze task:', error);

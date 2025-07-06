@@ -185,9 +185,25 @@ router.post('/:id/snooze', async (req, res, next) => {
                 snoozeUntil: null
             };
         } else {
-            // If not snoozed, snooze it for 1 hour
+            // If not snoozed, snooze it for the specified duration
+            const { duration } = req.body;
             const now = new Date();
-            const snoozeUntil = new Date(now.getTime() + 60 * 60 * 1000); // 1 hour from now
+            let snoozeUntil;
+
+            switch (duration) {
+                case '1h':
+                    snoozeUntil = new Date(now.getTime() + 60 * 60 * 1000); // 1 hour
+                    break;
+                case '1d':
+                    snoozeUntil = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 1 day
+                    break;
+                case '1w':
+                    snoozeUntil = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 1 week
+                    break;
+                default:
+                    snoozeUntil = new Date(now.getTime() + 60 * 60 * 1000); // Default to 1 hour
+            }
+
             updatedFields = {
                 snoozed: true,
                 snoozeUntil: snoozeUntil

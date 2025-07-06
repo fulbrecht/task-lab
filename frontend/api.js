@@ -88,8 +88,12 @@ export async function updateTask(id, updates) {
     return handleResponse(res);
 }
 
-export async function snoozeTask(id) {
-    const res = await fetch(`${API_BASE_URL}/tasks/${id}/snooze`, { method: 'POST' });
+export async function snoozeTask(id, duration) {
+    const res = await fetch(`${API_BASE_URL}/tasks/${id}/snooze`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ duration })
+    });
     return handleResponse(res);
 }
 
