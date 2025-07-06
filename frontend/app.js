@@ -60,12 +60,16 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         const newCount = ui.elements.dashboardTaskCountInput.value;
         localStorage.setItem('dashboardTaskCount', newCount);
-        ui.showToast('Settings saved!');
-        ui.showAppView(state.getCurrentUser());
-        taskActions.loadDashboardTasks();
-    }
 
-    // --- Event Delegation for Task List (Swipe for Touch and Mouse) ---
+        const swipeEnabled = ui.elements.enableSwipeSnooze.checked;
+        localStorage.setItem('swipeToSnoozeEnabled', swipeEnabled);
+
+        const darkModeEnabled = ui.elements.themeToggle.checked;
+        localStorage.setItem('darkModeEnabled', darkModeEnabled);
+        ui.applyTheme();
+
+        ui.showToast('Settings saved!');
+    }
     let startX = 0;
     let isMouseDown = false;
     let targetLi = null;
@@ -73,6 +77,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let isSwiping = false;
 
     function handleGestureStart(e) {
+        const swipeEnabled = localStorage.getItem('swipeToSnoozeEnabled') !== 'false';
+        if (!swipeEnabled) return;
+
         // Ignore swipes on controls like buttons or select dropdowns
         if (e.target.closest('.task-controls')) {
             return;
@@ -261,6 +268,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Settings
         ui.elements.settingsForm.addEventListener('submit', handleSaveSettings);
+        ui.elements.themeToggle.addEventListener('change', () => {
+            const darkModeEnabled = ui.elements.themeToggle.checked;
+            localStorage.setItem('darkModeEnabled', darkModeEnabled);
+            ui.applyTheme();
+        });
         if (ui.elements.enableNotificationsBtn) {
             ui.elements.enableNotificationsBtn.addEventListener('click', () => {
                 initializePushNotifications();
@@ -335,6 +347,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Event Delegation for both Task Lists ---
     // --- UI Rendering and State ---
     async function initializeApp() {
+        ui.applyTheme();
         try {
             const data = await api.checkAuthStatus();
             state.setCurrentUser(data.user.username);

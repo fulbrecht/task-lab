@@ -48,6 +48,8 @@ export const elements = {
     editTaskNotificationDate: document.getElementById('edit-task-notification-date'),
     editTaskList: document.getElementById('edit-task-list'),
     snoozeFeedback: document.getElementById('snooze-feedback'),
+    enableSwipeSnooze: document.getElementById('enable-swipe-snooze'),
+    themeToggle: document.getElementById('theme-toggle'),
 };
 
 // --- UI Toggling ---
@@ -103,6 +105,11 @@ export function showSettingsView(username) {
     elements.settingsContainer.style.display = 'block';
     const savedCount = localStorage.getItem('dashboardTaskCount') || 3;
     elements.dashboardTaskCountInput.value = savedCount;
+
+    const swipeEnabled = localStorage.getItem('swipeToSnoozeEnabled') !== 'false';
+    elements.enableSwipeSnooze.checked = swipeEnabled;
+
+    applyTheme();
     populateListSelects();
 }
 
@@ -164,4 +171,16 @@ export function populateListSelects() {
         option.textContent = list.charAt(0).toUpperCase() + list.slice(1);
         elements.editTaskList.appendChild(option);
     });
+}
+
+export function applyTheme() {
+    const darkModeEnabled = localStorage.getItem('darkModeEnabled') === 'true';
+    if (darkModeEnabled) {
+        document.body.classList.add('dark-mode');
+    } else {
+        document.body.classList.remove('dark-mode');
+    }
+    if (elements.themeToggle) {
+        elements.themeToggle.checked = darkModeEnabled;
+    }
 }
