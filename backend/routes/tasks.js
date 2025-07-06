@@ -17,18 +17,18 @@ const updateScheduledPriorities = async (userId) => {
     try {
       const now = new Date();
       
-      // Restore priority for snoozed tasks whose schedule has passed
+      // Restore snoozed tasks whose snoozeUntil date has passed
       const snoozedTasks = await Task.find({
         user: userId,
-        priority: 4, // Snoozed
-        prioritySchedule: { $exists: true, $ne: null, $lte: now },
+        snoozed: true,
+        snoozeUntil: { $exists: true, $ne: null, $lte: now },
         completed: false,
       });
 
       for (const task of snoozedTasks) {
-        task.priority = task.originalPriority || 1; // default to high if no original
-        task.originalPriority = null;
-        task.prioritySchedule = null;
+        task.snoozed = false;
+        task.snoozeUntil = null;
+        // The task's priority remains as it was before snoozing, no change needed here.
         await task.save();
       }
 
@@ -36,7 +36,8 @@ const updateScheduledPriorities = async (userId) => {
       await Task.updateMany(
         {
           user: userId,
-          priority: { $nin: [1, 4] }, // Not already high or snoozed
+          snoozed: false, // Only update non-snoozed tasks
+          priority: { $ne: 1 }, // Not already high
           prioritySchedule: { $exists: true, $ne: null, $lte: now },
           completed: false, // Only update uncompleted tasks
         },
@@ -70,7 +71,7 @@ router.get('/dashboard', processTasksMiddleware, async (req, res, next) => {
     }
 
 
-    const tasks = await Task.find({ user: req.user._id, completed: false })
+    const tasks = await Task.find({ user: req.user._id, completed: false, snoozed: false })
       .sort({ priority: 1, createdAt: 1 }) // Sort by priority (1=High), then age (oldest first)
       .limit(limit);
     
@@ -168,7 +169,7 @@ router.put('/:id', async (req, res, next) => {
   }
 });
 
-// SNOOZE a task
+// SNOOZE/UNSNOOZE a task
 router.post('/:id/snooze', async (req, res, next) => {
     try {
         const task = await Task.findOne({ _id: req.params.id, user: req.user._id });
@@ -176,18 +177,26 @@ router.post('/:id/snooze', async (req, res, next) => {
             return res.status(404).json({ message: 'Task not found or you do not have permission to edit it.' });
         }
 
-        const now = new Date();
-        const prioritySchedule = new Date(now.getTime() + 60 * 60 * 1000); // 1 hour from now
+        let updatedFields = {};
+        if (task.snoozed) {
+            // If already snoozed, unsnooze it
+            updatedFields = {
+                snoozed: false,
+                snoozeUntil: null
+            };
+        } else {
+            // If not snoozed, snooze it for 1 hour
+            const now = new Date();
+            const snoozeUntil = new Date(now.getTime() + 60 * 60 * 1000); // 1 hour from now
+            updatedFields = {
+                snoozed: true,
+                snoozeUntil: snoozeUntil
+            };
+        }
 
         const updatedTask = await Task.findOneAndUpdate(
             { _id: req.params.id, user: req.user._id },
-            { 
-                $set: { 
-                    priority: 4, // 4: Snoozed
-                    originalPriority: task.priority, // Save the original priority
-                    prioritySchedule 
-                }
-            },
+            { $set: updatedFields },
             { new: true, runValidators: true }
         );
 

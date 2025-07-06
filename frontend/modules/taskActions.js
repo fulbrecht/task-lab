@@ -127,15 +127,7 @@ export async function toggleTaskCompletion(id, completed) {
 
 export async function snoozeTask(id) {
     const taskElements = document.querySelectorAll(`li[data-id="${id}"]`);
-    if (taskElements.length > 0) {
-        taskElements.forEach(el => {
-            el.classList.add('snoozed');
-            // Remove the element after the animation completes
-            setTimeout(() => {
-                el.remove();
-            }, 500); // Match the animation duration
-        });
-    }
+    // No direct DOM manipulation here, reloadCurrentView will handle rendering based on updated data
 
     try {
         await api.snoozeTask(id);

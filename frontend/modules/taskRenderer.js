@@ -6,6 +6,9 @@ function createTaskElement(task, showControls) {
     if (task.completed) {
         li.classList.add('completed');
     }
+    if (task.snoozed) {
+        li.classList.add('snoozed');
+    }
     li.dataset.id = task._id;
 
     const priorityIndicator = document.createElement('div');
@@ -17,15 +20,15 @@ function createTaskElement(task, showControls) {
     titleSpan.textContent = task.title;
     li.appendChild(titleSpan);
 
-    if (task.priority === 4 && task.prioritySchedule) {
+    if (task.snoozed && task.snoozeUntil) {
         const countdownSpan = document.createElement('span');
         countdownSpan.className = 'snooze-countdown';
         li.appendChild(countdownSpan);
 
         const updateCountdown = () => {
             const now = new Date();
-            const schedule = new Date(task.prioritySchedule);
-            const diff = schedule - now;
+            const snoozeUntil = new Date(task.snoozeUntil);
+            const diff = snoozeUntil - now;
 
             if (diff <= 0) {
                 countdownSpan.textContent = '(Snoozed)';
