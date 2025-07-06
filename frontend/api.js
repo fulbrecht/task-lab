@@ -55,8 +55,8 @@ export async function checkAuthStatus() {
     return data;
 }
 
-export async function loadDashboardTasks(limit = 3) {
-    const res = await fetch(`${API_BASE_URL}/tasks/dashboard?limit=${limit}`, { cache: 'no-store' });
+export async function loadDashboardTasks(limit = 3, list = 'home') {
+    const res = await fetch(`${API_BASE_URL}/tasks/dashboard?limit=${limit}&list=${list}`, { cache: 'no-store' });
     return handleResponse(res);
 }
 
@@ -65,11 +65,11 @@ export async function loadTasks() {
     return handleResponse(res);
 }
 
-export async function addTask(title, priority, prioritySchedule, notificationDate) {
+export async function addTask(title, priority, prioritySchedule, notificationDate, list) {
     const res = await fetch(`${API_BASE_URL}/tasks`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, priority, prioritySchedule, notificationDate }),
+        body: JSON.stringify({ title, priority, prioritySchedule, notificationDate, list }),
     });
     return handleResponse(res);
 }

@@ -1,4 +1,54 @@
-/* --- Theme Variables --- */
+.list-selector-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    justify-content: center;
+}
+
+.list-selector-container label {
+    font-weight: bold;
+    color: #555;
+}
+
+.list-selector-container select {
+    padding: 12px 16px; /* Increased padding */
+    min-width: 150px; /* Ensure a minimum width */
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+    background-color: white;
+    cursor: pointer;
+    outline: none;
+    -webkit-appearance: none; /* Remove default browser styling for dropdown */
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007bff%22%20d%3D%22M287%2C197.3L159.3%2C69.6c-3.6-3.6-8.4-5.4-13.2-5.4s-9.6%2C1.8-13.2%2C5.4L5.4%2C197.3c-7.2%2C7.2-7.2%2C18.8%2C0%2C26c3.6%2C3.6%2C8.4%2C5.4%2C13.2%2C5.4h255.6c4.8%2C0%2C9.6-1.8%2C13.2-5.4C294.2%2C216.1%2C294.2%2C204.5%2C287%2C197.3z%22%2F%3E%3C%2Fsvg%3E');
+    background-repeat: no-repeat;
+    background-position: right 10px center; /* Adjusted vertical position */
+    background-size: 12px auto;
+}
+
+.list-selector-container select:hover {
+    border-color: var(--primary-color);
+}
+
+.list-selector-container select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+/* Add some spacing below the dashboard title */
+#app-container h1 {
+    margin-bottom: 10px;
+}
+
+/* Adjust subtitle margin to align with the new dropdown */
+#app-container .subtitle {
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
 /* Universal reset for html and body margins/paddings */
 html, body {
     margin: 0;
@@ -344,8 +394,7 @@ button[type="submit"]:hover {
 @media (max-width: 520px) {
     /* Adjust the main container padding for very small screens if needed */
     body {
-        padding-left: 10px;
-        padding-right: 10px;
+        padding: var(--main-nav-height) 10px 80px 10px; /* Adjust padding for smaller screens */
     }
 
     .container {
@@ -542,7 +591,7 @@ button[type="submit"]:hover {
     border: 1px solid var(--primary-color); /* Use primary color for edit */
     color: var(--primary-color);
     cursor: pointer;
-    padding: 4px 8px;
+    padding: 8px 12px; /* Increased padding for better touch target */
     font-size: 0.8rem;
     border-radius: 4px;
     transition: all 0.2s ease;
@@ -565,7 +614,7 @@ button[type="submit"]:hover {
     border: 1px solid var(--high-priority);
     color: var(--high-priority);
     cursor: pointer;
-    padding: 4px 8px;
+    padding: 8px 12px; /* Increased padding for better touch target */
     font-size: 0.8rem;
     border-radius: 4px;
     transition: all 0.2s ease;

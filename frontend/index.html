@@ -54,7 +54,13 @@
     <!-- Main App View (Dashboard) -->
     <div id="app-container" class="container" style="display: none;">
         <h1>Dashboard</h1>
-        <p class="subtitle">Your top 3 highest-priority tasks.</p>
+        <div class="list-selector-container">
+            <select id="task-list-select">
+                <option value="all">All Tasks</option>
+                <option value="home">Home</option>
+                <option value="work">Work</option>
+            </select>
+        </div>
         <ul id="dashboard-task-list" class="task-list"></ul>
     </div>
 
@@ -72,6 +78,9 @@
         <form id="settings-form">
             <label for="dashboard-task-count">Tasks on Dashboard</label>
             <input type="number" id="dashboard-task-count" min="1" max="10" value="3">
+            <label for="new-list-name">Add New List:</label>
+            <input type="text" id="new-list-name" placeholder="Enter new list name">
+            <button type="button" id="add-new-list-btn">Add List</button>
             <button type="submit">Save Settings</button>
         </form>
         <button id="enable-notifications-btn" type="button" class="btn" style="margin-top: 1rem;">Enable Notifications</button>
@@ -92,6 +101,12 @@
             <input type="datetime-local" id="task-priority-schedule" title="Schedule priority change">
             <label for="task-notification-date">Notification Date:</label>
             <input type="datetime-local" id="task-notification-date" title="Set notification date">
+            <label for="task-list">List:</label>
+            <select id="task-list">
+                <option value="">None</option>
+                <option value="home">Home</option>
+                <option value="work">Work</option>
+            </select>
             <button type="submit">Add Task</button>
             <button type="button" id="cancel-add-task-btn">Cancel</button>
         </form>
@@ -114,6 +129,12 @@
             <input type="datetime-local" id="edit-task-priority-schedule" title="Schedule priority change">
             <label for="edit-task-notification-date">Notification Date:</label>
             <input type="datetime-local" id="edit-task-notification-date" title="Set notification date">
+            <label for="edit-task-list">List:</label>
+            <select id="edit-task-list">
+                <option value="">None</option>
+                <option value="home">Home</option>
+                <option value="work">Work</option>
+            </select>
             <button type="submit">Save Changes</button>
             <button type="button" id="cancel-edit-task-btn">Cancel</button>
         </form>

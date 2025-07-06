@@ -71,10 +71,19 @@ router.get('/dashboard', processTasksMiddleware, async (req, res, next) => {
     }
 
 
-    const tasks = await Task.find({ user: req.user._id, completed: false, snoozed: false })
+    const list = req.query.list; // No default, handle 'all' explicitly
+    const findQuery = { user: req.user._id, completed: false, snoozed: false };
+    if (list && list !== 'all') {
+        findQuery.list = list;
+    } else if (list === 'all') {
+        // When 'all' is selected, include tasks with 'list' field as null or non-existent
+        findQuery.$or = [{ list: { $exists: false } }, { list: null }, { list: { $ne: null } }];
+    }
+
+    const tasks = await Task.find(findQuery)
       .sort({ priority: 1, createdAt: 1 }) // Sort by priority (1=High), then age (oldest first)
       .limit(limit);
-    
+
     res.json(tasks);
   } catch (error) {
     next(error);
@@ -129,6 +138,7 @@ router.post('/', async (req, res, next) => {
     prioritySchedule: req.body.prioritySchedule,
     notificationDate: req.body.notificationDate,
     user: req.user._id,
+    list: req.body.list || 'home',
   });
 
   try {
@@ -142,7 +152,7 @@ router.post('/', async (req, res, next) => {
 // PUT (update) a task
 router.put('/:id', async (req, res, next) => {
   try {
-    const { title, completed, completedTimestamp, priority, prioritySchedule, notificationDate } = req.body;
+    const { title, completed, completedTimestamp, priority, prioritySchedule, notificationDate, list } = req.body;
     const updates = {};
     if (title != null) updates.title = title;
     if (completed != null) updates.completed = completed;
@@ -153,6 +163,7 @@ router.put('/:id', async (req, res, next) => {
         updates.notificationDate = notificationDate;
         updates.notificationSent = false; // Reset notification status
     }
+    if (list != null) updates.list = list;
 
     const updatedTask = await Task.findOneAndUpdate(
       { _id: req.params.id, user: req.user._id },

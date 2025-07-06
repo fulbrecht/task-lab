@@ -22,7 +22,8 @@ async function reloadCurrentView() {
 export async function loadDashboardTasks() {
     try {
         const limit = localStorage.getItem('dashboardTaskCount') || 3;
-        const tasks = await api.loadDashboardTasks(limit);
+        const currentList = localStorage.getItem('currentTaskList') || 'home';
+        const tasks = await api.loadDashboardTasks(limit, currentList);
         renderTasks(tasks, elements.dashboardTaskList, false);
         scheduleNotifications(tasks);
     } catch (error) {
@@ -172,6 +173,7 @@ export async function handleEditClick(event) {
         elements.editTaskPriority.value = task.priority;
         elements.editTaskPrioritySchedule.value = toLocalDatetimeString(task.prioritySchedule);
         elements.editTaskNotificationDate.value = toLocalDatetimeString(task.notificationDate);
+        elements.editTaskList.value = task.list || 'home';
         elements.editTaskContainer.style.display = 'block';
         elements.showTaskFormBtn.style.display = 'none';
     } catch (error) {
@@ -188,6 +190,7 @@ export async function handleUpdateTask(e) {
         priority: parseInt(elements.editTaskPriority.value, 10),
         prioritySchedule: elements.editTaskPrioritySchedule.value ? new Date(elements.editTaskPrioritySchedule.value).toISOString() : null,
         notificationDate: elements.editTaskNotificationDate.value ? new Date(elements.editTaskNotificationDate.value).toISOString() : null,
+        list: elements.editTaskList.value,
     };
 
     if (updatedTask.title) {
@@ -212,14 +215,16 @@ export async function handleAddTask(e) {
     const priority = elements.taskPriorityInput.value;
     const prioritySchedule = elements.taskPriorityScheduleInput.value;
     const notificationDate = elements.taskNotificationDateInput.value;
+    const list = elements.taskListInput.value;
 
     if (title) {
         try {
-            await api.addTask(title, priority, prioritySchedule, notificationDate);
+            await api.addTask(title, priority, prioritySchedule, notificationDate, list);
             elements.taskInput.value = '';
             elements.taskPriorityInput.value = '3';
             elements.taskPriorityScheduleInput.value = '';
             elements.taskNotificationDateInput.value = '';
+            elements.taskListInput.value = 'home';
             hideAddTaskFormAndShowFab();
             elements.taskInput.focus();
             await reloadCurrentView();
@@ -228,7 +233,7 @@ export async function handleAddTask(e) {
             if ('serviceWorker' in navigator && 'SyncManager' in window) {
                 try {
                     const db = await idb.openDB('tasklab-db', 1);
-                    await db.add('sync-tasks', { title, priority, prioritySchedule, notificationDate });
+                    await db.add('sync-tasks', { title, priority, prioritySchedule, notificationDate, list });
                     const registration = await navigator.serviceWorker.ready;
                     await registration.sync.register('sync-new-task');
                     showToast('You are offline. Task saved for syncing.');

@@ -268,6 +268,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 ui.elements.enableNotificationsBtn.disabled = true;
             });
         }
+        ui.elements.addNewListBtn.addEventListener('click', () => {
+            const newList = ui.elements.newListInput.value.trim();
+            if (newList) {
+                let lists = JSON.parse(localStorage.getItem('taskLists') || '["home", "work"]');
+                if (!lists.includes(newList)) {
+                    lists.push(newList);
+                    localStorage.setItem('taskLists', JSON.stringify(lists));
+                    ui.populateListSelects();
+                    ui.elements.newListInput.value = '';
+                    ui.showToast(`List '${newList}' added!`);
+                } else {
+                    ui.showToast(`List '${newList}' already exists.`);
+                }
+            }
+        });
         const testNotificationBtn = document.getElementById('test-notification-btn');
         if (testNotificationBtn) {
             testNotificationBtn.addEventListener('click', async () => {
@@ -309,6 +324,12 @@ document.addEventListener('DOMContentLoaded', () => {
             ui.elements.mainMenu.classList.toggle('open');
             ui.elements.hamburgerMenuBtn.classList.toggle('open');
         });
+
+        // Task List Selection
+        ui.elements.taskListSelect.addEventListener('change', (e) => {
+            localStorage.setItem('currentTaskList', e.target.value);
+            taskActions.loadDashboardTasks();
+        });
     }
 
     // --- Event Delegation for both Task Lists ---
@@ -319,6 +340,10 @@ document.addEventListener('DOMContentLoaded', () => {
             state.setCurrentUser(data.user.username);
             ui.showAppView(state.getCurrentUser());
             taskActions.loadDashboardTasks();
+            ui.populateListSelects();
+            // Set the initial value of the task list select based on localStorage
+            const currentList = localStorage.getItem('currentTaskList') || 'all';
+            ui.elements.taskListSelect.value = currentList;
             setInterval(taskActions.checkScheduledTasks, 60000); // Check every minute
         } catch (error) {
             ui.showLoginView();

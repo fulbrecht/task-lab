@@ -16,10 +16,14 @@ export const elements = {
     dashboardTaskList: document.getElementById('dashboard-task-list'),
     browseTaskList: document.getElementById('browse-task-list'),
     dashboardTaskCountInput: document.getElementById('dashboard-task-count'),
+    newListInput: document.getElementById('new-list-name'),
+    addNewListBtn: document.getElementById('add-new-list-btn'),
+    taskListSelect: document.getElementById('task-list-select'),
     taskInput: document.getElementById('task-input'),
     taskPriorityInput: document.getElementById('task-priority'),
     taskPriorityScheduleInput: document.getElementById('task-priority-schedule'),
     taskNotificationDateInput: document.getElementById('task-notification-date'),
+    taskListInput: document.getElementById('task-list'),
     authError: document.getElementById('auth-error'),
     toast: document.getElementById('toast-notification'),
     loginForm: document.getElementById('login-form'),
@@ -42,6 +46,7 @@ export const elements = {
     editTaskPriority: document.getElementById('edit-task-priority'),
     editTaskPrioritySchedule: document.getElementById('edit-task-priority-schedule'),
     editTaskNotificationDate: document.getElementById('edit-task-notification-date'),
+    editTaskList: document.getElementById('edit-task-list'),
     snoozeFeedback: document.getElementById('snooze-feedback'),
 };
 
@@ -98,6 +103,7 @@ export function showSettingsView(username) {
     elements.settingsContainer.style.display = 'block';
     const savedCount = localStorage.getItem('dashboardTaskCount') || 3;
     elements.dashboardTaskCountInput.value = savedCount;
+    populateListSelects();
 }
 
 export function showToast(message) {
@@ -113,4 +119,49 @@ export function hideAddTaskFormAndShowFab() {
     elements.addTaskContainer.style.display = 'none';
     elements.showTaskFormBtn.style.display = 'block';
     elements.authError.textContent = '';
+}
+
+export function populateListSelects() {
+    const lists = JSON.parse(localStorage.getItem('taskLists') || '["home", "work"]');
+
+    // Populate dashboard list select
+    elements.taskListSelect.innerHTML = '';
+    const allOption = document.createElement('option');
+    allOption.value = 'all';
+    allOption.textContent = 'All Tasks';
+    elements.taskListSelect.appendChild(allOption);
+    lists.forEach(list => {
+        const option = document.createElement('option');
+        option.value = list;
+        option.textContent = list.charAt(0).toUpperCase() + list.slice(1);
+        elements.taskListSelect.appendChild(option);
+    });
+    const currentList = localStorage.getItem('currentTaskList') || 'all';
+    elements.taskListSelect.value = currentList;
+
+    // Populate add task list select
+    elements.taskListInput.innerHTML = '';
+    const noneOption = document.createElement('option');
+    noneOption.value = '';
+    noneOption.textContent = 'None';
+    elements.taskListInput.appendChild(noneOption);
+    lists.forEach(list => {
+        const option = document.createElement('option');
+        option.value = list;
+        option.textContent = list.charAt(0).toUpperCase() + list.slice(1);
+        elements.taskListInput.appendChild(option);
+    });
+
+    // Populate edit task list select
+    elements.editTaskList.innerHTML = '';
+    const editNoneOption = document.createElement('option');
+    editNoneOption.value = '';
+    editNoneOption.textContent = 'None';
+    elements.editTaskList.appendChild(editNoneOption);
+    lists.forEach(list => {
+        const option = document.createElement('option');
+        option.value = list;
+        option.textContent = list.charAt(0).toUpperCase() + list.slice(1);
+        elements.editTaskList.appendChild(option);
+    });
 }

@@ -11,6 +11,11 @@ const taskSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
+    list: {
+        type: String,
+        default: 'home',
+        trim: true
+    },
     completed: {
         type: Boolean,
         default: false
