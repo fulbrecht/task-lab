@@ -197,9 +197,7 @@ router.post('/:id/snooze', async (req, res, next) => {
                 case '1d':
                     snoozeUntil = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 1 day
                     break;
-                case '1w':
-                    snoozeUntil = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 1 week
-                    break;
+                
                 default:
                     snoozeUntil = new Date(now.getTime() + 60 * 60 * 1000); // Default to 1 hour
             }

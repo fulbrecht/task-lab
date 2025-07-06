@@ -469,8 +469,10 @@ button[type="submit"]:hover {
     background-color: rgba(255, 193, 7, 0.8); /* Yellow */
 }
 
-.snooze-feedback.snooze-1w {
-    background-color: rgba(220, 53, 69, 0.8); /* Red */
+
+
+.snooze-feedback.snooze-unsnooze {
+    background-color: rgba(0, 123, 255, 0.8); /* Blue */
 }
 
 

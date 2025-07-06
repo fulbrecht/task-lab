@@ -81,6 +81,12 @@ document.addEventListener('DOMContentLoaded', () => {
         targetLi = e.target.closest('li[data-id]');
         if (!targetLi) return;
 
+        // Disable swiping for completed tasks
+        if (targetLi.classList.contains('completed')) {
+            targetLi = null; // Clear targetLi to prevent further processing
+            return;
+        }
+
         if (e.type === 'touchstart') {
             startX = e.changedTouches[0].screenX;
         } else if (e.type === 'mousedown') {
@@ -114,9 +120,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const snoozeFeedback = targetLi.querySelector('.snooze-feedback');
             if (snoozeFeedback) {
                 snoozeFeedback.classList.add('visible');
-                if (diffX < -150) {
-                    snoozeFeedback.textContent = 'Snooze 1 Week';
-                    snoozeFeedback.className = 'snooze-feedback visible snooze-1w';
+                if (targetLi.classList.contains('snoozed')) {
+                    snoozeFeedback.textContent = 'Unsnooze';
+                    snoozeFeedback.className = 'snooze-feedback visible snooze-unsnooze';
                 } else if (diffX < -100) {
                     snoozeFeedback.textContent = 'Snooze 1 Day';
                     snoozeFeedback.className = 'snooze-feedback visible snooze-1d';
@@ -177,10 +183,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleSwipe(li, diffX) {
         const taskId = li.dataset.id;
         let duration = '1h'; // Default to 1 hour
-        if (diffX < -150) {
-            duration = '1w';
-        } else if (diffX < -100) {
+        if (diffX < -100) {
             duration = '1d';
+        } else if (diffX < -50) {
+            duration = '1h';
         }
         taskActions.snoozeTask(taskId, duration);
     }
