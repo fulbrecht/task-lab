@@ -461,6 +461,18 @@ button[type="submit"]:hover {
     opacity: 1;
 }
 
+.snooze-feedback.snooze-1h {
+    background-color: rgba(40, 167, 69, 0.8); /* Green */
+}
+
+.snooze-feedback.snooze-1d {
+    background-color: rgba(255, 193, 7, 0.8); /* Yellow */
+}
+
+.snooze-feedback.snooze-1w {
+    background-color: rgba(220, 53, 69, 0.8); /* Red */
+}
+
 
 
 .task-list li:last-child {

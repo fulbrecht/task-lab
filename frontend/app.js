@@ -116,13 +116,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 snoozeFeedback.classList.add('visible');
                 if (diffX < -150) {
                     snoozeFeedback.textContent = 'Snooze 1 Week';
+                    snoozeFeedback.className = 'snooze-feedback visible snooze-1w';
                 } else if (diffX < -100) {
                     snoozeFeedback.textContent = 'Snooze 1 Day';
+                    snoozeFeedback.className = 'snooze-feedback visible snooze-1d';
                 } else if (diffX < -50) {
                     snoozeFeedback.textContent = 'Snooze 1 Hour';
+                    snoozeFeedback.className = 'snooze-feedback visible snooze-1h';
                 } else {
                     snoozeFeedback.textContent = '';
-                    snoozeFeedback.classList.remove('visible');
+                    snoozeFeedback.className = 'snooze-feedback';
                 }
             }
         } else {
