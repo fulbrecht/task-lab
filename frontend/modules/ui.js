@@ -114,6 +114,7 @@ export function showSettingsView(username) {
 
     applyTheme();
     populateListSelects();
+    renderUserLists(state.getUserLists());
 }
 
 export function showToast(message) {
