@@ -46,7 +46,7 @@ router.post('/logout', (req, res, next) => {
 
 // Get current user
 router.get('/user', (req, res) => {
-  res.json({ user: req.isAuthenticated() ? { id: req.user._id, username: req.user.username } : null });
+  res.json({ user: req.isAuthenticated() ? { id: req.user._id, username: req.user.username, lists: req.user.lists } : null });
 });
 
 module.exports = router;

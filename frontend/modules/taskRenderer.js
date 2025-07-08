@@ -83,3 +83,30 @@ export function renderTasks(tasks, listElement, showControls) {
     tasks.forEach(task => fragment.appendChild(createTaskElement(task, showControls)));
     listElement.appendChild(fragment);
 }
+
+export function appendTask(task, listElement, showControls) {
+    listElement.appendChild(createTaskElement(task, showControls));
+}
+
+export function removeTaskFromUI(taskId) {
+    const taskElement = document.querySelector(`li[data-id="${taskId}"]`);
+    if (taskElement) {
+        taskElement.remove();
+    }
+}
+
+export function updateTaskInUI(task) {
+    const taskElement = document.querySelector(`li[data-id="${task._id}"]`);
+    if (taskElement) {
+        const newTaskElement = createTaskElement(task, true); // Assuming controls are shown
+        taskElement.replaceWith(newTaskElement);
+    }
+}
+
+export function replaceTaskInUI(tempId, finalTask) {
+    const tempTaskElement = document.querySelector(`li[data-id="${tempId}"]`);
+    if (tempTaskElement) {
+        const finalTaskElement = createTaskElement(finalTask, true);
+        tempTaskElement.replaceWith(finalTaskElement);
+    }
+}

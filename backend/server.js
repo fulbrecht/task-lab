@@ -14,6 +14,7 @@ const User = require('./models/user'); // Import the User model
 const authRoutes = require('./routes/auth');
 const taskRoutes = require('./routes/tasks');
 const notificationRoutes = require('./routes/notifications').router;
+const listsRoutes = require('./routes/lists');
 require('./scheduler'); // Start the scheduler
 
 const app = express();
@@ -29,7 +30,7 @@ if (!vapidKeys.publicKey || !vapidKeys.privateKey) {
     console.log("VAPID keys not found in .env. Push notifications will be disabled. Generate them using 'npx web-push generate-vapid-keys'");
 } else {
     webpush.setVapidDetails(
-        'mailto:your-email@example.com', // Replace with your contact email
+        'mailto:contact@tasklab.com', // Replace with your contact email
         vapidKeys.publicKey,
         vapidKeys.privateKey
     );
@@ -91,6 +92,7 @@ passport.deserializeUser(async (id, done) => {
 app.use('/api', authRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/lists', listsRoutes);
 
 // --- Serve Frontend Static Files ---
 // This must come AFTER all API routes

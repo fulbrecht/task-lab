@@ -16,6 +16,10 @@ const UserSchema = new mongoose.Schema({
   subscriptions: {
     type: [mongoose.Schema.Types.Mixed],
     default: []
+  },
+  lists: {
+    type: [String],
+    default: ['none']
   }
 });
 

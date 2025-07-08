@@ -41,6 +41,7 @@ export const elements = {
     cancelAddTaskBtn: document.getElementById('cancel-add-task-btn'),
     cancelEditTaskBtn: document.getElementById('cancel-edit-task-btn'),
     enableNotificationsBtn: document.getElementById('enable-notifications-btn'),
+    testNotificationBtn: document.getElementById('test-notification-btn'),
     editTaskId: document.getElementById('edit-task-id'),
     editTaskTitle: document.getElementById('edit-task-title'),
     editTaskPriority: document.getElementById('edit-task-priority'),
@@ -50,6 +51,8 @@ export const elements = {
     snoozeFeedback: document.getElementById('snooze-feedback'),
     enableSwipeSnooze: document.getElementById('enable-swipe-snooze'),
     themeToggle: document.getElementById('theme-toggle'),
+    userListsContainer: document.getElementById('user-lists-container'),
+    userLists: document.getElementById('user-lists'),
 };
 
 // --- UI Toggling ---
@@ -128,8 +131,10 @@ export function hideAddTaskFormAndShowFab() {
     elements.authError.textContent = '';
 }
 
+import * as state from './state.js';
+
 export function populateListSelects() {
-    const lists = JSON.parse(localStorage.getItem('taskLists') || '["home", "work"]');
+    const lists = state.getUserLists();
 
     // Populate dashboard list select
     elements.taskListSelect.innerHTML = '';
@@ -158,6 +163,7 @@ export function populateListSelects() {
         option.textContent = list.charAt(0).toUpperCase() + list.slice(1);
         elements.taskListInput.appendChild(option);
     });
+    elements.taskListInput.value = localStorage.getItem('currentTaskList') || '';
 
     // Populate edit task list select
     elements.editTaskList.innerHTML = '';
@@ -170,6 +176,22 @@ export function populateListSelects() {
         option.value = list;
         option.textContent = list.charAt(0).toUpperCase() + list.slice(1);
         elements.editTaskList.appendChild(option);
+    });
+}
+
+export function renderUserLists(lists) {
+    elements.userLists.innerHTML = '';
+    lists.forEach(list => {
+        const li = document.createElement('li');
+        li.textContent = list;
+        if (list !== 'home' && list !== 'work') { // Allow deleting only custom lists
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'delete-list-btn';
+            deleteBtn.dataset.listName = list;
+            deleteBtn.textContent = 'Delete';
+            li.appendChild(deleteBtn);
+        }
+        elements.userLists.appendChild(li);
     });
 }
 

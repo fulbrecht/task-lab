@@ -25,7 +25,7 @@
         <span id="username-display" class="menu-item"></span>
         <a href="#" id="go-to-settings" class="menu-item">Settings</a>
         <a href="#" id="go-to-browse" class="menu-item">Browse All Tasks</a>
-        <button id="global-refresh-btn" class="menu-item refresh-btn" title="Refresh">&#x21bb; Refresh</button>
+        
         <button id="global-logout-btn" class="menu-item">Logout</button>
     </div>
     <div id="auth-container" class="container">
@@ -109,6 +109,10 @@
                     <label for="new-list-name">Add New List:</label>
                     <input type="text" id="new-list-name" placeholder="Enter new list name">
                     <button type="button" id="add-new-list-btn">Add List</button>
+                </div>
+                <div id="user-lists-container" class="setting-item">
+                    <h3>Your Lists:</h3>
+                    <ul id="user-lists"></ul>
                 </div>
             </div>
 
