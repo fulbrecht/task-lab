@@ -55,7 +55,7 @@ app.use(
     cookie: {
       maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
       secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
-      sameSite: process.env.NODE_ENV === 'production' ? 'lax' : 'strict', // Adjust SameSite for PWA
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict', // Use 'none' for cross-site PWA compatibility
     },
   })
 );
