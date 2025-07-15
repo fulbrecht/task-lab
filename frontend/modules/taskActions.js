@@ -330,7 +330,7 @@ function handleGestureMove(e) {
             if (targetLi.classList.contains('snoozed')) {
                 snoozeFeedback.textContent = 'Unsnooze';
                 snoozeFeedback.className = 'snooze-feedback visible snooze-unsnooze';
-            } else if (diffX < -100) {
+            } else if (diffX < -150) {
                 snoozeFeedback.textContent = 'Snooze 1 Day';
                 snoozeFeedback.className = 'snooze-feedback visible snooze-1d';
             } else if (diffX < -50) {
@@ -388,7 +388,7 @@ function handleMouseLeave(e) {
 function handleSwipe(li, diffX) {
     const taskId = li.dataset.id;
     let duration = '1h';
-    if (diffX < -100) {
+    if (diffX < -150) {
         duration = '1d';
     } else if (diffX < -50) {
         duration = '1h';
