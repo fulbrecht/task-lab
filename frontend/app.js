@@ -32,8 +32,8 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const data = await api.login(username, password);
             state.setCurrentUser(data.user.username);
-            state.setUserLists(data.user.lists);
-            await db.saveListsToDb(data.user.lists);
+            state.setUserLists(data.user.lists || []);
+            await db.saveListsToDb(data.user.lists || []);
             ui.showAppView(state.getCurrentUser());
             taskActions.syncAndLoadTasks(); // Use new sync function
         } catch (error) {
@@ -49,8 +49,8 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const data = await api.register(username, password);
             state.setCurrentUser(data.user.username);
-            state.setUserLists(data.user.lists);
-            await db.saveListsToDb(data.user.lists);
+            state.setUserLists(data.user.lists || []);
+            await db.saveListsToDb(data.user.lists || []);
             ui.showAppView(state.getCurrentUser());
             taskActions.syncAndLoadTasks(); // Use new sync function
         } catch (error) {
@@ -224,8 +224,8 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const data = await api.checkAuthStatus();
             state.setCurrentUser(data.user.username);
-            state.setUserLists(data.user.lists);
-            await db.saveListsToDb(data.user.lists); // Save server lists to local DB
+            state.setUserLists(data.user.lists || []);
+            await db.saveListsToDb(data.user.lists || []); // Save server lists to local DB
             ui.showAppView(state.getCurrentUser());
             ui.populateListSelects();
             ui.renderUserLists(state.getUserLists());
