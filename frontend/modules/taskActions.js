@@ -74,7 +74,7 @@ export async function handleAddTask(e) {
     elements.taskPriorityInput.value = '3'; // Reset priority to default
     elements.taskPriorityScheduleInput.value = ''; // Clear schedule date
     elements.taskNotificationDateInput.value = ''; // Clear notification date
-    elements.taskListInput.value = 'home'; // Reset list to default
+    elements.taskListInput.value = localStorage.getItem('currentTaskList') || ''; // Reset list to current list
     hideAddTaskFormAndShowFab();
 
     // Now, try to sync with the server in the background
@@ -87,6 +87,18 @@ export async function handleAddTask(e) {
     } catch (error) {
         showToast('Task saved locally. It will sync with the server when you\'re back online.');
         console.error('Failed to add task to server:', error);
+        // Add to request queue for background sync
+        if ('serviceWorker' in navigator && 'SyncManager' in window) {
+            await db.addToRequestQueue({
+                url: '/api/tasks',
+                method: 'POST',
+                body: newTask, // Use newTask directly, as it contains all necessary data
+                _id: newTask._id // Store the temporary ID for later reconciliation
+            });
+            navigator.serviceWorker.ready.then(reg => {
+                reg.sync.register('sync-new-task');
+            });
+        }
     }
 }
 
@@ -101,6 +113,16 @@ export async function handleDeleteTask(id) {
     } catch (error) {
         showToast('Task deleted locally. It will sync with the server later.');
         console.error('Failed to delete task on server:', error);
+        if ('serviceWorker' in navigator && 'SyncManager' in window) {
+            await db.addToRequestQueue({
+                url: `/api/tasks/${id}`,
+                method: 'DELETE',
+                _id: id // Store the ID for later reconciliation
+            });
+            navigator.serviceWorker.ready.then(reg => {
+                reg.sync.register('sync-delete-task');
+            });
+        }
     }
 }
 
@@ -128,6 +150,17 @@ export async function handleUpdateTask(e) {
     } catch (error) {
         showToast('Task updated locally. It will sync with the server later.');
         console.error('Failed to update task on server:', error);
+        if ('serviceWorker' in navigator && 'SyncManager' in window) {
+            await db.addToRequestQueue({
+                url: `/api/tasks/${id}`,
+                method: 'PUT',
+                body: updatedTaskData,
+                _id: id // Store the ID for later reconciliation
+            });
+            navigator.serviceWorker.ready.then(reg => {
+                reg.sync.register('sync-update-task');
+            });
+        }
     }
 }
 
@@ -146,6 +179,17 @@ export async function handleToggleTaskCompletion(id, completed) {
     } catch (error) {
         showToast('Completion status saved locally. It will sync later.');
         console.error('Failed to update task completion on server:', error);
+        if ('serviceWorker' in navigator && 'SyncManager' in window) {
+            await db.addToRequestQueue({
+                url: `/api/tasks/${id}`,
+                method: 'PUT',
+                body: { completed, completedTimestamp: updatedTask.completedTimestamp },
+                _id: id // Store the ID for later reconciliation
+            });
+            navigator.serviceWorker.ready.then(reg => {
+                reg.sync.register('sync-update-task');
+            });
+        }
     }
 }
 
@@ -179,6 +223,17 @@ export async function handleSnoozeTask(id, duration) {
     } catch (error) {
         showToast('Snooze status saved locally. It will sync later.');
         console.error('Failed to snooze task on server:', error);
+        if ('serviceWorker' in navigator && 'SyncManager' in window) {
+            await db.addToRequestQueue({
+                url: `/api/tasks/${id}/snooze`,
+                method: 'POST',
+                body: { duration },
+                _id: id // Store the ID for later reconciliation
+            });
+            navigator.serviceWorker.ready.then(reg => {
+                reg.sync.register('sync-snooze-task');
+            });
+        }
     }
 }
 

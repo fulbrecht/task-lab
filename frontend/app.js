@@ -32,6 +32,8 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const data = await api.login(username, password);
             state.setCurrentUser(data.user.username);
+            state.setUserLists(data.user.lists);
+            await db.saveListsToDb(data.user.lists);
             ui.showAppView(state.getCurrentUser());
             taskActions.syncAndLoadTasks(); // Use new sync function
         } catch (error) {
@@ -157,6 +159,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     } catch (error) {
                         ui.showToast('List added locally. It will sync with the server when you\'re back online.');
                         console.error('Failed to add list to server:', error);
+                        if ('serviceWorker' in navigator && 'SyncManager' in window) {
+                            await db.addToRequestQueue({
+                                url: '/api/lists',
+                                method: 'POST',
+                                body: { listName },
+                                _id: listName // Use listName as ID for reconciliation
+                            });
+                            navigator.serviceWorker.ready.then(reg => {
+                                reg.sync.register('sync-add-list');
+                            });
+                        }
                     }
                 } catch (error) {
                     ui.showToast(`Error adding list: ${error.message}`);
@@ -178,6 +191,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     } catch (error) {
                         ui.showToast('List deleted locally. It will sync with the server later.');
                         console.error('Failed to delete list on server:', error);
+                        if ('serviceWorker' in navigator && 'SyncManager' in window) {
+                            await db.addToRequestQueue({
+                                url: `/api/lists/${listName}`,
+                                method: 'DELETE',
+                                _id: listName // Use listName as ID for reconciliation
+                            });
+                            navigator.serviceWorker.ready.then(reg => {
+                                reg.sync.register('sync-delete-list');
+                            });
+                        }
                     }
                 }
             }

@@ -3,9 +3,10 @@
 const { openDB } = idb;
 
 const DB_NAME = 'tasklab-db';
-const DB_VERSION = 3; // Increment DB version to force upgrade
+export const DB_VERSION = 4; // Increment DB version to force upgrade and create request-queue
 export const TASK_STORE_NAME = 'tasks';
 export const LIST_STORE_NAME = 'lists';
+export const QUEUE_STORE_NAME = 'request-queue';
 
 async function getDb() {
   return openDB(DB_NAME, DB_VERSION, {
@@ -15,6 +16,9 @@ async function getDb() {
       }
       if (oldVersion < 2) {
         db.createObjectStore(LIST_STORE_NAME, { keyPath: 'name' });
+      }
+      if (oldVersion < 4) {
+        db.createObjectStore('request-queue', { autoIncrement: true });
       }
     },
   });
@@ -75,4 +79,9 @@ export async function addList(listName) {
 export async function deleteList(listName) {
   const db = await getDb();
   return db.delete(LIST_STORE_NAME, listName);
+}
+
+export async function addToRequestQueue(request) {
+  const db = await getDb();
+  return db.add(QUEUE_STORE_NAME, request);
 }
