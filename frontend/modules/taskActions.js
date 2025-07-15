@@ -202,10 +202,15 @@ export async function handleSnoozeTask(id, duration) {
         snoozed = false;
     } else {
         const now = new Date();
-        if (duration === 60) { // 1 hour
+        if (duration === 60 || duration === '1h') { // 1 hour
             snoozeUntil = new Date(now.getTime() + 60 * 60 * 1000).toISOString();
-        } else if (duration === 1440) { // 1 day
+        } else if (duration === 1440 || duration === '1d') { // 1 day
             snoozeUntil = new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString();
+        } else if (typeof duration === 'number' && duration > 0) {
+             snoozeUntil = new Date(now.getTime() + duration * 60 * 1000).toISOString();
+        } else {
+            // Invalid duration, so don't snooze
+            snoozed = false;
         }
     }
 
@@ -387,6 +392,10 @@ function handleMouseLeave(e) {
 
 function handleSwipe(li, diffX) {
     const taskId = li.dataset.id;
+    if (li.classList.contains('snoozed')) {
+        handleSnoozeTask(taskId, 'unsnooze');
+        return;
+    }
     let duration = '1h';
     if (diffX < -150) {
         duration = '1d';
