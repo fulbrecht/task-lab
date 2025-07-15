@@ -41,6 +41,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // --- Session Configuration ---
+// Trust the first proxy when in production for secure cookies
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
@@ -48,7 +53,9 @@ app.use(
     saveUninitialized: false,
     store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI }),
     cookie: {
-      maxAge: 1000 * 60 * 60 * 24, // 1 day
+      maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
+      secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+      sameSite: process.env.NODE_ENV === 'production' ? 'lax' : 'strict', // Adjust SameSite for PWA
     },
   })
 );
