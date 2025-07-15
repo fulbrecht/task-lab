@@ -89,15 +89,21 @@ export async function handleAddTask(e) {
         console.error('Failed to add task to server:', error);
         // Add to request queue for background sync
         if ('serviceWorker' in navigator && 'SyncManager' in window) {
-            await db.addToRequestQueue({
-                url: '/api/tasks',
-                method: 'POST',
-                body: newTask, // Use newTask directly, as it contains all necessary data
-                _id: newTask._id // Store the temporary ID for later reconciliation
-            });
-            navigator.serviceWorker.ready.then(reg => {
-                reg.sync.register('sync-new-task');
-            });
+            try {
+                await db.addToRequestQueue({
+                    url: '/api/tasks',
+                    method: 'POST',
+                    body: newTask, // Use newTask directly, as it contains all necessary data
+                    _id: newTask._id // Store the temporary ID for later reconciliation
+                });
+                const registration = await navigator.serviceWorker.ready;
+                await registration.sync.register('sync-new-task');
+            } catch (syncError) {
+                console.error('Failed to register for background sync:', syncError);
+                showToast('Error: Could not queue task for server sync.', 'error');
+            }
+        } else {
+            showToast('Error: Background sync not supported.', 'error');
         }
     }
 }
