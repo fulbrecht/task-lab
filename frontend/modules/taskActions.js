@@ -463,7 +463,7 @@ export function setupTaskEventListeners() {
 }
 
 export function scheduleNotifications(tasks) {
-    if (Notification.permission === 'granted') {
+    if ('Notification' in window && Notification.permission === 'granted') {
         tasks.forEach(task => {
             if (task.notificationDate) {
                 const notificationTime = new Date(task.notificationDate).getTime();

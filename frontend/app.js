@@ -221,25 +221,45 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- App Initialization ---
     async function initializeApp() {
         ui.applyTheme();
+        initializeEventListeners(); // Set up listeners early
+        let serverAuthenticated = false;
+
         try {
             const data = await api.checkAuthStatus();
             state.setCurrentUser(data.user.username);
             state.setUserLists(data.user.lists || []);
-            await db.saveListsToDb(data.user.lists || []); // Save server lists to local DB
+            await db.saveListsToDb(data.user.lists || []);
             ui.showAppView(state.getCurrentUser());
             ui.populateListSelects();
             ui.renderUserLists(state.getUserLists());
-            await taskActions.syncAndLoadTasks(); // Initial data load
+            await taskActions.syncAndLoadTasks(); // Initial data load from server
+            serverAuthenticated = true;
         } catch (error) {
-            // If auth check fails, try to load from local DB
-            console.warn('Authentication failed, attempting to load lists from local DB.', error);
-            const localLists = await db.getAllLists();
+            console.warn('Initial auth check failed. App will start in offline mode.', error);
+            // Don't show login view yet. Proceed with local data.
+            ui.showAppView(); // Show main view, but without user-specifics initially
+        }
+
+        // Always load local data to provide immediate UI
+        const localLists = await db.getAllLists();
+        if (localLists && localLists.length > 0) {
             state.setUserLists(localLists);
             ui.populateListSelects();
             ui.renderUserLists(state.getUserLists());
-            ui.showLoginView();
         }
-        initializeEventListeners();
+
+        // Load local tasks regardless of auth status
+        await taskActions.syncAndLoadTasks();
+
+        if (!serverAuthenticated) {
+            // If the server auth failed, the user might still be logged out.
+            // The UI is now loaded with local data, but we need to determine if the login view should be shown.
+            // A simple check could be if there are no local lists or tasks, it's likely a new user.
+            const localTasks = await db.getAllTasks();
+            if (localLists.length === 0 && localTasks.length === 0) {
+                ui.showLoginView();
+            }
+        }
     }
 
     initializeApp();
