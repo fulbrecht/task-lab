@@ -1,14 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/user');
+const { ensureAuthenticated } = require('../middleware');
 
-// Middleware to ensure user is authenticated
-function ensureAuthenticated(req, res, next) {
-    if (req.isAuthenticated()) {
-        return next();
-    }
-    res.status(401).json({ message: 'Unauthorized' });
-}
+
 
 // Get all lists for the authenticated user
 router.get('/', ensureAuthenticated, async (req, res) => {

@@ -2,9 +2,13 @@ import * as api from '/api.js';
 import * as state from '/modules/state.js';
 import * as ui from '/modules/ui.js';
 import * as taskActions from '/modules/taskActions.js';
+import { syncAndLoadTasks } from '/modules/taskSync.js';
 import { replaceTaskInUI } from '/modules/taskRenderer.js';
 import * as pushNotifications from '/pushNotifications.js';
 import * as db from '/modules/localDb.js';
+import { showLoginView, showRegisterView, showAppView, showBrowseView, showSettingsView } from '/modules/view.js';
+import { applyTheme } from '/modules/theme.js';
+import { populateListSelects, renderUserLists } from '/modules/list.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     // Register Service Worker
@@ -34,8 +38,8 @@ document.addEventListener('DOMContentLoaded', () => {
             state.setCurrentUser(data.user.username);
             state.setUserLists(data.user.lists || []);
             await db.saveListsToDb(data.user.lists || []);
-            ui.showAppView(state.getCurrentUser());
-            taskActions.syncAndLoadTasks(); // Use new sync function
+            showAppView(state.getCurrentUser());
+            syncAndLoadTasks(); // Use new sync function
         } catch (error) {
             ui.elements.authError.textContent = error.message;
         }
@@ -51,8 +55,8 @@ document.addEventListener('DOMContentLoaded', () => {
             state.setCurrentUser(data.user.username);
             state.setUserLists(data.user.lists || []);
             await db.saveListsToDb(data.user.lists || []);
-            ui.showAppView(state.getCurrentUser());
-            taskActions.syncAndLoadTasks(); // Use new sync function
+            showAppView(state.getCurrentUser());
+            syncAndLoadTasks(); // Use new sync function
         } catch (error) {
             ui.elements.authError.textContent = error.message;
         }
@@ -64,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
             state.clearCurrentUser();
             state.clearUserLists();
             await db.saveListsToDb([]); // Clear local lists on logout
-            ui.showLoginView();
+            showLoginView();
         } catch (error) {
             console.error('Logout failed:', error);
         }
@@ -79,21 +83,21 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.addEventListener('click', (e) => {
             if (e.target.matches('#show-register')) {
                 e.preventDefault();
-                ui.showRegisterView();
+                showRegisterView();
             } else if (e.target.matches('#show-login')) {
                 e.preventDefault();
-                ui.showLoginView();
+                showLoginView();
             } else if (e.target.matches('#go-to-browse')) {
                 e.preventDefault();
-                ui.showBrowseView(state.getCurrentUser());
-                taskActions.syncAndLoadTasks(); // Use new sync function
+                showBrowseView(state.getCurrentUser());
+                syncAndLoadTasks(); // Use new sync function
             } else if (e.target.matches('#go-to-dashboard, #go-to-dashboard-from-browse, #go-to-dashboard-from-settings')) {
                 e.preventDefault();
-                ui.showAppView(state.getCurrentUser());
-                taskActions.syncAndLoadTasks(); // Use new sync function
+                showAppView(state.getCurrentUser());
+                syncAndLoadTasks(); // Use new sync function
             } else if (e.target.matches('#go-to-settings')) {
                 e.preventDefault();
-                ui.showSettingsView(state.getCurrentUser());
+                showSettingsView(state.getCurrentUser());
             }
         });
 
@@ -121,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Settings
         ui.elements.dashboardTaskCountInput.addEventListener('change', (e) => {
             localStorage.setItem('dashboardTaskCount', e.target.value);
-            taskActions.syncAndLoadTasks();
+            syncAndLoadTasks();
         });
 
         ui.elements.enableSwipeSnooze.addEventListener('change', (e) => {
@@ -130,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         ui.elements.themeToggle.addEventListener('change', (e) => {
             localStorage.setItem('darkModeEnabled', e.target.checked);
-            ui.applyTheme();
+            applyTheme();
         });
 
         // Notifications
@@ -145,8 +149,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     await db.addList(listName);
                     const updatedLocalLists = await db.getAllLists();
                     state.setUserLists(updatedLocalLists);
-                    ui.populateListSelects();
-                    ui.renderUserLists(state.getUserLists());
+                    populateListSelects();
+                    renderUserLists(state.getUserLists());
                     ui.elements.newListInput.value = '';
 
                     // Then try to sync with server
@@ -154,8 +158,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         const response = await api.addList(listName);
                         state.setUserLists(response.lists);
                         await db.saveListsToDb(response.lists); // Ensure local DB is in sync with server
-                        ui.populateListSelects();
-                        ui.renderUserLists(state.getUserLists());
+                        populateListSelects();
+                        renderUserLists(state.getUserLists());
                     } catch (error) {
                         ui.showToast('List added locally. It will sync with the server when you\'re back online.');
                         console.error('Failed to add list to server:', error);
@@ -186,8 +190,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         const response = await api.deleteList(listName);
                         state.setUserLists(response.lists);
                         await db.saveListsToDb(response.lists); // Ensure local DB is in sync with server
-                        ui.populateListSelects();
-                        ui.renderUserLists(state.getUserLists());
+                        populateListSelects();
+                        renderUserLists(state.getUserLists());
                     } catch (error) {
                         ui.showToast('List deleted locally. It will sync with the server later.');
                         console.error('Failed to delete list on server:', error);
@@ -213,14 +217,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         ui.elements.taskListSelect.addEventListener('change', (e) => {
             localStorage.setItem('currentTaskList', e.target.value);
-            taskActions.syncAndLoadTasks();
+            syncAndLoadTasks();
         });
         // Task list click handlers moved to taskActions.js
     }
 
     // --- App Initialization ---
     async function initializeApp() {
-        ui.applyTheme();
+        applyTheme();
         initializeEventListeners(); // Set up listeners early
         let serverAuthenticated = false;
 
@@ -229,27 +233,27 @@ document.addEventListener('DOMContentLoaded', () => {
             state.setCurrentUser(data.user.username);
             state.setUserLists(data.user.lists || []);
             await db.saveListsToDb(data.user.lists || []);
-            ui.showAppView(state.getCurrentUser());
-            ui.populateListSelects();
-            ui.renderUserLists(state.getUserLists());
-            await taskActions.syncAndLoadTasks(); // Initial data load from server
+            showAppView(state.getCurrentUser());
+            populateListSelects();
+            renderUserLists(state.getUserLists());
+            await syncAndLoadTasks(); // Initial data load from server
             serverAuthenticated = true;
         } catch (error) {
             console.warn('Initial auth check failed. App will start in offline mode.', error);
             // Don't show login view yet. Proceed with local data.
-            ui.showAppView(); // Show main view, but without user-specifics initially
+            showAppView(); // Show main view, but without user-specifics initially
         }
 
         // Always load local data to provide immediate UI
         const localLists = await db.getAllLists();
         if (localLists && localLists.length > 0) {
             state.setUserLists(localLists);
-            ui.populateListSelects();
-            ui.renderUserLists(state.getUserLists());
+            populateListSelects();
+            renderUserLists(state.getUserLists());
         }
 
         // Load local tasks regardless of auth status
-        await taskActions.syncAndLoadTasks();
+        await syncAndLoadTasks();
 
         if (!serverAuthenticated) {
             // If the server auth failed, the user might still be logged out.
@@ -257,7 +261,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // A simple check could be if there are no local lists or tasks, it's likely a new user.
             const localTasks = await db.getAllTasks();
             if (localLists.length === 0 && localTasks.length === 0) {
-                ui.showLoginView();
+                showLoginView();
             }
         }
     }

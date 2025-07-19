@@ -33,7 +33,7 @@ const checkScheduledTasks = async () => {
 };
 
 // Schedule the task to run every minute
-cron.schedule('* * * * *', checkScheduledTasks);
+cron.schedule(process.env.CRON_SCHEDULE || '* * * * *', checkScheduledTasks);
 
 console.log('Scheduler initialized. Will run every minute.');
 
